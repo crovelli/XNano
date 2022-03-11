@@ -11,8 +11,11 @@ git cms-init
 
 
 ## Add the modification needed to use the KinematicParticleVertexFitter
-## Still to be checked, comment for me moment
-## git cms-merge-topic -u CMSBParking:fixKinParticleVtxFitter
+
+```shell
+Still to be checked, comment for the moment
+git cms-merge-topic -u CMSBParking:fixKinParticleVtxFitter
+```
 
 
 ## Add the XNano package and build everything
@@ -22,6 +25,7 @@ git clone git@github.com:crovelli/XNano.git ./PhysicsTools/XNano
 git cms-addpkg PhysicsTools/NanoAOD
 scram b
 ```
+
 
 ## To run on a test file
 ```shell
