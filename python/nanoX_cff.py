@@ -44,7 +44,7 @@ def nanoAOD_customizeTriggerBitsX(process):
     return process
 
 def nanoAOD_customizeB0ToK0X(process):
-    process.nanoB0ToK0XSequence = cms.Sequence( JPsiMuMuSequence + JPsiToMuMuTableSequence + K0sToPiPiSequence + K0sToPiPiTableSequence + candPiPiSequence + candPiPiTableSequence + BToK0sMuMuPiPiSequence + BToK0sMuMuPiPiTableSequence )
+    process.nanoB0ToK0XSequence = cms.Sequence( JPsiMuMuSequence + JPsiToMuMuTableSequence + candPiPiSequence + candPiPiTableSequence + K0sToPiPiSequence + K0sToPiPiTableSequence + BToK0sMuMuPiPiSequence + BToK0sMuMuPiPiTableSequence )
     return process
 
 
