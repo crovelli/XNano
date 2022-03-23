@@ -13,41 +13,30 @@ muonPairsForJPsiMuMu = cms.EDProducer(
     lep2Selection = cms.string('pt > 2.5'),
     preVtxSelection = cms.string('abs(userCand("l1").vz - userCand("l2").vz) <= 1. && mass() < 5 '
                                  '&& mass() > 1 && charge() == 0 && userFloat("lep_deltaR") > 0.02'),
-    postVtxSelection =  cms.string('userFloat("sv_prob") > 1.e-3'
+    postVtxSelection =  cms.string('userFloat("sv_prob") > 0.01'
                                  '&& userFloat("fitted_mass") > 2.50 && userFloat("fitted_mass") < 4.00'  
                                ),
 )
 
-
 # K0s -> pi pi
 K0sToPiPi = cms.EDProducer(
     'K0sBuilder',
-    pfcands= cms.InputTag('tracksX', 'SelectedTracks'),
-    transientTracks= cms.InputTag('tracksX', 'SelectedTransientTracks'),
-    trk1Selection = cms.string('pt > 0.4 && abs(eta)<3.0'), 
-    trk2Selection = cms.string('pt > 0.4 && abs(eta)<3.0'), 
-    preVtxSelection = cms.string('abs(userCand("trk1").vz - userCand("trk2").vz)<=1.0' 
-                                 ' && userFloat("trk_deltaR") > 0.02'
-                                 ' &&  pt()>0.5 && (mass() < 0.750 && mass() > 0.250)'
-                             ),
+    dipion = cms.InputTag('candPiPi', 'SelectedDiPions'),
+    dimuons = cms.InputTag('muonPairsForJPsiMuMu', 'SelectedDiMuons'),
+    svSrc = cms.InputTag("slimmedKshortVertices"),
     postVtxSelection = cms.string('userFloat("sv_prob") > 1.e-2'
                                   ' && (  (userFloat("fitted_mass")<0.700 && userFloat("fitted_mass")>0.300))'
                               )
 )
 
-
 # pi+pi- candidate 
 candPiPi = cms.EDProducer(
     'PiPiBuilder',
+    dimuons = cms.InputTag('muonPairsForJPsiMuMu', 'SelectedDiMuons'),
     pfcands= cms.InputTag('tracksX', 'SelectedTracks'),
-    transientTracks= cms.InputTag('tracksX', 'SelectedTransientTracks'),
-    trk1Selection = cms.string('pt > 0.4 && abs(eta)<3.0'),
-    trk2Selection = cms.string('pt > 0.4 && abs(eta)<3.0'), 
+    trkSelection = cms.string('pt > 0.4 && abs(eta)<3.0'),
     preVtxSelection = cms.string('abs(userCand("trk1").vz - userCand("trk2").vz) <= 1.0'
-                                 '&& userFloat("trk_deltaR") > 0.02'),
-    postVtxSelection = cms.string('userFloat("sv_prob") > 1.e-3'
-                                  ' && userFloat("fitted_mass")>0.400'
-                                  )
+                                 '&& userFloat("trk_deltaR") > 0.02')
 )
 
 
@@ -56,37 +45,28 @@ BToK0sMuMuPiPi = cms.EDProducer(
     'BToK0sMuMuPiPiBuilder',
 
     dimuons = cms.InputTag('muonPairsForJPsiMuMu', 'SelectedDiMuons'),
-    dimuonKinVtxs = cms.InputTag('muonPairsForJPsiMuMu', 'SelectedDiMuonKinVtxs'),
     muonTransientTracks = muonPairsForJPsiMuMu.transientTracksSrc,
 
     k0short = cms.InputTag('K0sToPiPi', 'SelectedK0s'),
-    k0shortKinVtxs = cms.InputTag('K0sToPiPi', 'SelectedK0sKinVtxs'),  
-    k0shortTransientTracks = cms.InputTag('tracksX', 'SelectedTransientTracks'),
+    k0shortKinVtxsWMC = cms.InputTag('K0sToPiPi', 'SelectedK0sKinVtxsWMC'),  
 
     dipion = cms.InputTag('candPiPi', 'SelectedDiPions'),
-    dipionKinVtxs = cms.InputTag('candPiPi', 'SelectedDiPionKinVtxs'), 
     pionTransientTracks = cms.InputTag('tracksX', 'SelectedTransientTracks'),
 
     beamSpot = cms.InputTag("offlineBeamSpot"),
     offlinePrimaryVertexSrc = cms.InputTag('offlineSlimmedPrimaryVertices'), 
 
-    # to compute isolation variables
-    #tracks = cms.InputTag("packedPFCandidates"),
-    #lostTracks = cms.InputTag("lostTracks"),
-    #isoTracksSelection = cms.string('pt > 0.7 && abs(eta)<2.5'),
-    
-    preVtxSelection = cms.string(
-        'pt > 0.5 && userFloat("min_dr") > 0.03'
-        '&& (mass < 7. && mass > 4.) '
-        ),
-
     postVtxSelection = cms.string(
         'userFloat("sv_prob") > 0.01 '
         '&& userFloat("sv_chi2") > 0. '
-        #'&& userFloat("fitted_cosTheta2D_PV") >= 0'
-        #'&& userFloat("lxySign_PV") >= 3'
         '&& (userFloat("fitted_mass") > 4.5 && userFloat("fitted_mass") < 6.)'
-        '&& (userFloat("fitted_X_mass") > 3.0 && userFloat("fitted_X_mass") < 4.5)'
+        '&& (userFloat("finalFit_X_mass") > 3.0 && userFloat("finalFit_X_mass") < 4.5)'
+    ),
+
+    postVtxSelection2 = cms.string(
+#        'userFloat("fit_cos3D_PV") >= 0'
+#        '&& userFloat("lxySign_PV") >= 3'
+        'userFloat("lxySign_PV") >= 3'
     )
 )
 
@@ -102,20 +82,11 @@ JPsiToMuMuTable = cms.EDProducer(
     singleton=cms.bool(False),
     extension=cms.bool(False),
     variables=cms.PSet(
-      CandVars,
-      fitted_mass = ufloat('fitted_mass'),
-      fitted_massErr = ufloat('fitted_massErr'),
-      svprob = ufloat('sv_prob'),        
-      svndof = ufloat('sv_ndof'),
-      svchi2 = ufloat('sv_chi2'),         
-      l1_idx = uint('l1_idx'),
-      l2_idx = uint('l2_idx') #,
-      #fitted_l1_pt = ufloat('fitted_l1_pt'),  
-      #fitted_l2_pt = ufloat('fitted_l2_pt'),  
-      #fitted_l1_eta = ufloat('fitted_l1_eta'),  
-      #fitted_l2_eta = ufloat('fitted_l2_eta'),  
-      #fitted_l1_phi = ufloat('fitted_l1_phi'),  
-      #fitted_l2_phi = ufloat('fitted_l2_phi')
+      # CandVars,
+      #fitted_mass = ufloat('fitted_mass'),
+      # svprob = ufloat('sv_prob'),        
+      #l1_idx = uint('l1_idx'),
+      #l2_idx = uint('l2_idx') 
     )
 )
 
@@ -128,22 +99,15 @@ K0sToPiPiTable = cms.EDProducer(
     singleton=cms.bool(False),
     extension=cms.bool(False),
     variables=cms.PSet(
-      CandVars,
-      fitted_mass = ufloat('fitted_mass'),
-      fitted_pt = ufloat('fitted_pt'),
-      fitted_eta = ufloat('fitted_eta'),
-      fitted_phi = ufloat('fitted_phi'),
-      svprob = ufloat('sv_prob'),         
-      svndof = ufloat('sv_ndof'),
-      svchi2 = ufloat('sv_chi2'),         
-      trk1_idx = uint('trk1_idx'),
-      trk2_idx = uint('trk2_idx')  #,
-      #fitted_trk1_pt = ufloat('fitted_trk1_pt'),  
-      #fitted_trk2_pt = ufloat('fitted_trk2_pt'),  
-      #fitted_trk1_eta = ufloat('fitted_trk1_eta'),  
-      #fitted_trk2_eta = ufloat('fitted_trk2_eta'),  
-      #fitted_trk1_phi = ufloat('fitted_trk1_phi'),  
-      #fitted_trk2_phi = ufloat('fitted_trk2_phi')
+      #CandVars,
+      # fitted_nmc_mass = ufloat('fitted_nmc_mass'),
+      # svprob = ufloat('sv_prob'),         
+      #fitted_mass = ufloat('fitted_mass'),
+      # fitted_pt = ufloat('fitted_pt'),
+      # fitted_eta = ufloat('fitted_eta'),
+      # fitted_phi = ufloat('fitted_phi'),
+      #mumu_idx = uint('mumu_idx'),  
+      #pipi_idx = uint('pipi_idx')
     )
 )
 
@@ -156,19 +120,10 @@ candPiPiTable = cms.EDProducer(
     singleton=cms.bool(False),
     extension=cms.bool(False),
     variables=cms.PSet(
-      CandVars,
-      fitted_mass = ufloat('fitted_mass'),
-      svprob = ufloat('sv_prob'),         
-      svndof = ufloat('sv_ndof'),
-      svchi2 = ufloat('sv_chi2'),         
-      trk1_idx = uint('trk1_idx'),
-      trk2_idx = uint('trk2_idx')    #,
-      #fitted_trk1_pt = ufloat('fitted_trk1_pt'),  
-      #fitted_trk2_pt = ufloat('fitted_trk2_pt'),  
-      #fitted_trk1_eta = ufloat('fitted_trk1_eta'),  
-      #fitted_trk2_eta = ufloat('fitted_trk2_eta'),  
-      #fitted_trk1_phi = ufloat('fitted_trk1_phi'),  
-      #fitted_trk2_phi = ufloat('fitted_trk2_phi')
+      #CandVars,
+      #trk1_idx = uint('trk1_idx'),
+      #trk2_idx = uint('trk2_idx'),   
+      #mumu_idx = uint('mumu_idx')   
     )
 )
 
@@ -181,82 +136,114 @@ BToK0sMuMuPiPiTable = cms.EDProducer(
     singleton=cms.bool(False),
     extension=cms.bool(False),
     variables=cms.PSet(
-        # pre-fit quantities
-        CandVars,
+        # CandVars,  
+        # index
         mu1_idx = uint('mu1_idx'),
         mu2_idx = uint('mu2_idx'),
-        trk1Rho_idx = uint('trk1Rho_idx'),
-        trk2Rho_idx = uint('trk2Rho_idx'),
-        trk1k0s_idx = uint('trk1k0s_idx'),
-        trk2k0s_idx = uint('trk2k0s_idx'),
+        pi1_idx = uint('trk1Rho_idx'),
+        pi2_idx = uint('trk2Rho_idx'),
         k0short_idx = uint('k0short_idx'),
         dipion_idx  = uint('dipion_idx'),
-        dilepton_idx = uint('dilepton_idx'),
-        pv_idx = uint('pv_idx'),
-        min_dr = ufloat('min_dr'), 
-        max_dr = ufloat('max_dr'),   
+        dimuon_idx = uint('dimuon_idx'),
+        # fitted p4
+        fitted_mass_womc = ufloat('fitted_mass_womc'),
+        finalFit_mass = ufloat('fitted_mass'),
+        finalFit_pt = ufloat('fitted_pt'),
+        finalFit_eta = ufloat('fitted_eta'),
+        finalFit_phi = ufloat('fitted_phi'),
+        # fitted daughters
+        finalFit_X_mass = ufloat('finalFit_X_mass'),        
+        finalFit_Rho_mass  = ufloat('finalFit_Rho_mass'),
+        finalFit_JPsi_mass = ufloat('finalFit_JPsi_mass'),
+        finalFit_mu1_pt   = ufloat('finalFit_mu1_pt'),
+        finalFit_mu1_eta  = ufloat('finalFit_mu1_eta'),
+        finalFit_mu1_phi  = ufloat('finalFit_mu1_phi'),
+        finalFit_mu2_pt   = ufloat('finalFit_mu2_pt'),
+        finalFit_mu2_eta  = ufloat('finalFit_mu2_eta'),
+        finalFit_mu2_phi  = ufloat('finalFit_mu2_phi'),
+        finalFit_pi1_pt  = ufloat('finalFit_pi1Rho_pt'),
+        finalFit_pi1_eta = ufloat('finalFit_pi1Rho_eta'),
+        finalFit_pi1_phi = ufloat('finalFit_pi1Rho_phi'),
+        finalFit_pi2_pt  = ufloat('finalFit_pi2Rho_pt'),
+        finalFit_pi2_eta = ufloat('finalFit_pi2Rho_eta'),
+        finalFit_pi2_phi = ufloat('finalFit_pi2Rho_phi'),
+        finalFit_k0s_pt   = ufloat('finalFit_k0s_pt'),
+        finalFit_k0s_eta  = ufloat('finalFit_k0s_eta'),
+        finalFit_k0s_phi  = ufloat('finalFit_k0s_phi'),        
         # fit and vtx info
         svchi2 = ufloat('sv_chi2'),
-        svndof = ufloat('sv_ndof'),
         svprob = ufloat('sv_prob'),
-        lxyBS = ufloat('lxy_BS'),
-        lxyPV = ufloat('lxy_PV'),
-        lxyUncBS = ufloat('lxyUnc_BS'),
-        lxyUncPV = ufloat('lxyUnc_PV'),
-        # k0short/Rho/JPsi fitted in B0 vertex
-        fit_k0short_mass = ufloat('fitted_k0short_mass'),
-        fitted_Rho_mass  = ufloat('fitted_Rho_mass'),
-        fitted_JPsi_mass = ufloat('fitted_JPsi_mass'),
-        fitted_X_mass = ufloat('fitted_X_mass'),
-        # Cos(theta)
-        cos2D_BS = ufloat('cosTheta2D_BS'),
-        cos2D_PV = ufloat('cosTheta2D_PV'),
-        fit_cos2D_BS = ufloat('fitted_cosTheta2D_BS'),
-        fit_cos2D_PV = ufloat('fitted_cosTheta2D_PV'),
-        # post-fit momentum
-        fit_mass = ufloat('fitted_mass'),
-        fit_massErr = ufloat('fitted_massErr'),
-        fit_pt = ufloat('fitted_pt'),
-        fit_eta = ufloat('fitted_eta'),
-        fit_phi = ufloat('fitted_phi'),
-        # post-fit tracks/leptons
-        #l1
-        fit_mu1_pt  = ufloat('fitted_mu1_pt'),
-        fit_mu1_eta = ufloat('fitted_mu1_eta'),
-        fit_mu1_phi = ufloat('fitted_mu1_phi'),
-        #l2
-        fit_mu2_pt  = ufloat('fitted_mu2_pt'),
-        fit_mu2_eta = ufloat('fitted_mu2_eta'),
-        fit_mu2_phi = ufloat('fitted_mu2_phi'),
-        #trk1
-        fit_trk1Rho_pt  = ufloat('fitted_trk1Rho_pt'),
-        fit_trk1Rho_eta = ufloat('fitted_trk1Rho_eta'),
-        fit_trk1Rho_phi = ufloat('fitted_trk1Rho_phi'),
-        #trk2
-        fit_trk2Rho_pt  = ufloat('fitted_trk2Rho_pt'),
-        fit_trk2Rho_eta = ufloat('fitted_trk2Rho_eta'),
-        fit_trk2Rho_phi = ufloat('fitted_trk2Rho_phi'),
-        #trk1k0s
-        fit_trk1k0s_pt  = ufloat('fitted_trk1k0s_pt'),
-        fit_trk1k0s_eta = ufloat('fitted_trk1k0s_eta'),
-        fit_trk1k0s_phi = ufloat('fitted_trk1k0s_phi'),
-        #trk2k0s
-        fit_trk2k0s_pt  = ufloat('fitted_trk2k0s_pt'),
-        fit_trk2k0s_eta = ufloat('fitted_trk2k0s_eta'),
-        fit_trk2k0s_phi = ufloat('fitted_trk2k0s_phi'),
-        #
-        fit2_mass = ufloat('fitted2_mass'),
-        # isolation 
-        #l1_iso03 = ufloat('l1_iso03'),
-        #l1_iso04 = ufloat('l1_iso04'),
-        #l2_iso03 = ufloat('l2_iso03'),
-        #l2_iso04 = ufloat('l2_iso04'),
-        #tk1_iso03 = ufloat('tk1_iso03'),
-        #tk1_iso04 = ufloat('tk1_iso04'),
-        #tk2_iso03 = ufloat('tk2_iso03'),
-        #tk2_iso04 = ufloat('tk2_iso04'),
-        #b_iso03  = ufloat('b_iso03'),
-        #b_iso04  = ufloat('b_iso04'),
+        decayVtxX = ufloat('decayVtxX'),
+        decayVtxY = ufloat('decayVtxY'),
+        decayVtxZ = ufloat('decayVtxZ'),
+        decayVtxXE = ufloat('decayVtxXE'),
+        decayVtxYE = ufloat('decayVtxYE'),
+        decayVtxZE = ufloat('decayVtxZE'),
+        # Cos(theta) 
+        lxySign_PV = ufloat('lxySign_PV'),
+        cosAlpha_PV = ufloat('cosAlpha_PV'),
+        # vtx
+        pv_idx = uint('pv_idx'),
+        PVx  = ufloat('PVx'),
+        PVy  = ufloat('PVy'),
+        PVz  = ufloat('PVz'),
+        PVEx = ufloat('PVEx'),
+        PVEy = ufloat('PVEy'),
+        PVEz = ufloat('PVEz'),
+        # mumu
+        MuMu_sv_prob = ufloat('MuMu_sv_prob'),
+        MuMu_fitted_mass = ufloat('MuMu_fitted_mass'),
+        MuMu_fitted_pt  = ufloat('MuMu_fitted_pt'),
+        MuMu_fitted_eta = ufloat('MuMu_fitted_eta'),
+        MuMu_fitted_phi = ufloat('MuMu_fitted_phi'),
+        MuMu_fitted_vtxX = ufloat('MuMu_fitted_vtxX'),
+        MuMu_fitted_vtxY = ufloat('MuMu_fitted_vtxY'),
+        MuMu_fitted_vtxZ = ufloat('MuMu_fitted_vtxZ'),
+        MuMu_fitted_vtxXE = ufloat('MuMu_fitted_vtxXE'),
+        MuMu_fitted_vtxYE = ufloat('MuMu_fitted_vtxYE'),
+        MuMu_fitted_vtxZE = ufloat('MuMu_fitted_vtxZE'),
+        MuMu_prefit_mu1_pt  = ufloat('MuMu_prefit_mu1_pt'),
+        MuMu_prefit_mu1_eta = ufloat('MuMu_prefit_mu1_eta'),
+        MuMu_prefit_mu1_phi = ufloat('MuMu_prefit_mu1_phi'),
+        MuMu_prefit_mu2_pt  = ufloat('MuMu_prefit_mu2_pt'),
+        MuMu_prefit_mu2_eta = ufloat('MuMu_prefit_mu2_eta'),
+        MuMu_prefit_mu2_phi = ufloat('MuMu_prefit_mu2_phi'),
+        # pipi   
+        PiPi_prefit_pi1_pt  = ufloat('PiPi_prefit_pi1_pt'),
+        PiPi_prefit_pi1_eta = ufloat('PiPi_prefit_pi1_eta'),
+        PiPi_prefit_pi1_phi = ufloat('PiPi_prefit_pi1_phi'),
+        PiPi_prefit_pi2_pt  = ufloat('PiPi_prefit_pi2_pt'),
+        PiPi_prefit_pi2_eta = ufloat('PiPi_prefit_pi2_eta'),
+        PiPi_prefit_pi2_phi = ufloat('PiPi_prefit_pi2_phi'),
+        PiPi_prefit_pi1_vx  = ufloat('PiPi_prefit_pi1_vx'),
+        PiPi_prefit_pi1_vy  = ufloat('PiPi_prefit_pi1_vy'),
+        PiPi_prefit_pi1_vz  = ufloat('PiPi_prefit_pi1_vz'),
+        PiPi_prefit_pi2_vx  = ufloat('PiPi_prefit_pi2_vx'),
+        PiPi_prefit_pi2_vy  = ufloat('PiPi_prefit_pi2_vy'),
+        PiPi_prefit_pi2_vz  = ufloat('PiPi_prefit_pi2_vz'),
+        #PiPi_prefit_pi1_ipsign = ufloat('PiPi_prefit_pi1_ipsign'),
+        #PiPi_prefit_pi2_ipsign = ufloat('PiPi_prefit_pi2_ipsign'),
+        # K0s
+        K0s_nmcFitted_mass = ufloat('K0s_nmcFitted_mass'),
+        K0s_nmcFitted_pi1pt  = ufloat('K0s_nmcFitted_pi1pt'),
+        K0s_nmcFitted_pi1eta = ufloat('K0s_nmcFitted_pi1eta'),
+        K0s_nmcFitted_pi1phi = ufloat('K0s_nmcFitted_pi1phi'),
+        K0s_nmcFitted_pi2pt  = ufloat('K0s_nmcFitted_pi2pt'),
+        K0s_nmcFitted_pi2eta = ufloat('K0s_nmcFitted_pi2eta'),
+        K0s_nmcFitted_pi2phi = ufloat('K0s_nmcFitted_pi2phi'),
+        K0s_mcFitted_svprob  = ufloat('K0s_mcFitted_svprob'),
+        K0s_mcFitted_mass = ufloat('K0s_mcFitted_mass'),
+        K0s_mcFitted_pt   = ufloat('K0s_mcFitted_pt'),
+        K0s_mcFitted_eta  = ufloat('K0s_mcFitted_eta'),
+        K0s_mcFitted_phi  = ufloat('K0s_mcFitted_phi'),
+        K0s_mcFitted_vtxX = ufloat('K0s_mcFitted_vtxX'),
+        K0s_mcFitted_vtxY = ufloat('K0s_mcFitted_vtxY'),
+        K0s_mcFitted_vtxZ = ufloat('K0s_mcFitted_vtxZ'),
+        K0s_mcFitted_vtxXE = ufloat('K0s_mcFitted_vtxXE'),
+        K0s_mcFitted_vtxYE = ufloat('K0s_mcFitted_vtxYE'),
+        K0s_mcFitted_vtxZE = ufloat('K0s_mcFitted_vtxZE') #,
+        #K0s_prefit_pi1_ipsign = ufloat('K0s_prefit_pi1_ipsign'),
+        #K0s_prefit_pi2_ipsign = ufloat('K0s_prefit_pi2_ipsign')
     )
 )
 
@@ -293,17 +280,17 @@ JPsiMuMuSequence = cms.Sequence(
 
 JPsiToMuMuTableSequence = cms.Sequence( JPsiToMuMuTable )
 
-K0sToPiPiSequence = cms.Sequence(  
-    ( K0sToPiPi * CountK0s )
-)
-
-K0sToPiPiTableSequence = cms.Sequence( K0sToPiPiTable )   
-
 candPiPiSequence = cms.Sequence(
     ( candPiPi * CountPiPi )
 )
 
 candPiPiTableSequence = cms.Sequence( candPiPiTable )
+
+K0sToPiPiSequence = cms.Sequence(  
+    ( K0sToPiPi * CountK0s )
+)
+
+K0sToPiPiTableSequence = cms.Sequence( K0sToPiPiTable )   
 
 BToK0sMuMuPiPiSequence = cms.Sequence( 
     ( BToK0sMuMuPiPi * CountBToK0sMuMuPiPi )
