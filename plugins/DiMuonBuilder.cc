@@ -4,20 +4,19 @@
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/Utilities/interface/InputTag.h"
-
-#include <vector>
-#include <memory>
-#include <map>
-#include <string>
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
+#include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/Math/interface/deltaR.h"
-#include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "RecoVertex/KinematicFitPrimitives/interface/RefCountedKinematicVertex.h"
+#include "RecoVertex/KinematicFitPrimitives/interface/KinematicState.h"
+
+#include <vector>
+#include <string>
+
 #include "helper.h"
-#include <limits>
-#include <algorithm>
 #include "KinVtxFitter.h"
 
 class DiMuonBuilder : public edm::global::EDProducer<> {
@@ -35,7 +34,6 @@ public:
     src_{consumes<MuonCollection>( cfg.getParameter<edm::InputTag>("src") )},
     ttracks_src_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("transientTracksSrc") )} {
       produces<pat::CompositeCandidateCollection>("SelectedDiMuons");
-      produces<std::vector<KinVtxFitter> >("SelectedDiMuonKinVtxs");
     }
 
   ~DiMuonBuilder() override {}
@@ -64,8 +62,7 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 
   // output
   std::unique_ptr<pat::CompositeCandidateCollection> ret_value(new pat::CompositeCandidateCollection());
-  std::unique_ptr<std::vector<KinVtxFitter> > kinVtx_out( new std::vector<KinVtxFitter> );
-
+  
   for(size_t l1_idx = 0; l1_idx < muons->size(); ++l1_idx) {
     edm::Ptr<pat::Muon> l1_ptr(muons, l1_idx);
     if(!l1_selection_(*l1_ptr)) continue; 
@@ -73,6 +70,7 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
     for(size_t l2_idx = l1_idx + 1; l2_idx < muons->size(); ++l2_idx) {
       edm::Ptr<pat::Muon> l2_ptr(muons, l2_idx);
       if(!l2_selection_(*l2_ptr)) continue;
+
 
       // Muons must be different
       if (l1_idx==l2_idx) continue;
@@ -99,31 +97,49 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 			  );
       if ( !fitter.success() ) continue;
 
-      // save quantities after fit  
-      muon_pair.addUserFloat("sv_chi2", fitter.chi2());
-      muon_pair.addUserFloat("sv_ndof", fitter.dof());
-      muon_pair.addUserFloat("sv_prob", fitter.prob());
-      muon_pair.addUserFloat("fitted_mass", fitter.success() ? fitter.fitted_candidate().mass() : -1);
-      muon_pair.addUserFloat("fitted_massErr", fitter.success() ? sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)) : -1);
+      // save quantities after fit needed for selection and to be saved in the final ntuples
+      KinematicState fitted_cand = fitter.fitted_candidate();
 
-      // refitted daughters (leptons)     
-      // std::vector<std::string> dnames{ "l1", "l2" };
-      // for (size_t idaughter=0; idaughter<dnames.size(); idaughter++){
-      // muon_pair.addUserFloat("fitted_" + dnames[idaughter] + "_pt" ,fitter.daughter_p4(idaughter).pt() );
-      // muon_pair.addUserFloat("fitted_" + dnames[idaughter] + "_eta",fitter.daughter_p4(idaughter).eta() );
-      // muon_pair.addUserFloat("fitted_" + dnames[idaughter] + "_phi",fitter.daughter_p4(idaughter).phi() );
-      // }
+      muon_pair.addUserFloat("sv_prob", fitter.prob());
+      muon_pair.addUserFloat("fitted_mass", fitter.success() ? fitted_cand.mass() : -1);
 
       // cut on the SV info
       if( !post_vtx_selection_(muon_pair) ) continue;
 
+
+      // save further quantities, to be saved in the final ntuples: JPsi infos after fit
+      TVector3 B_J(fitted_cand.globalMomentum().x(),
+		   fitted_cand.globalMomentum().y(),
+		   fitted_cand.globalMomentum().z());
+      muon_pair.addUserFloat("fitted_pt",  B_J.Pt());
+      muon_pair.addUserFloat("fitted_eta", B_J.Eta());
+      muon_pair.addUserFloat("fitted_phi", B_J.Phi());
+
+      // save further quantities, to be saved in the final ntuples: JPsi vertex after fit
+      RefCountedKinematicVertex fitted_vtx = fitter.fitted_refvtx();
+      muon_pair.addUserFloat("fitted_vtxX",  fitted_vtx->position().x());
+      muon_pair.addUserFloat("fitted_vtxY",  fitted_vtx->position().y());
+      muon_pair.addUserFloat("fitted_vtxZ",  fitted_vtx->position().z());
+      muon_pair.addUserFloat("fitted_vtxEx", fitted_vtx->error().cxx());
+      muon_pair.addUserFloat("fitted_vtxEy", fitted_vtx->error().cyy());
+      muon_pair.addUserFloat("fitted_vtxEz", fitted_vtx->error().czz());
+
+      // save further quantities, to be saved in the final ntuples: muons before fit
+      // Muons post fit are saved only after the very final B fit
+      muon_pair.addUserFloat("mu1_pt",  l1_ptr->pt());
+      muon_pair.addUserFloat("mu1_eta", l1_ptr->eta());
+      muon_pair.addUserFloat("mu1_phi", l1_ptr->phi());
+      muon_pair.addUserFloat("mu2_pt",  l2_ptr->pt());
+      muon_pair.addUserFloat("mu2_eta", l2_ptr->eta());
+      muon_pair.addUserFloat("mu2_phi", l2_ptr->phi());
+
+      
+      // push in the event
       ret_value->push_back(muon_pair);
-      kinVtx_out->push_back(fitter);
     }
   }
 
-  evt.put(std::move(ret_value), "SelectedDiMuons");
-  evt.put(std::move(kinVtx_out), "SelectedDiMuonKinVtxs");
+  evt.put(std::move(ret_value),  "SelectedDiMuons");
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
