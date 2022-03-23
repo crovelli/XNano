@@ -27,6 +27,8 @@ KinVtxFitter::KinVtxFitter(const std::vector<reco::TransientTrack> tracks,
     return;
   }
 
+  vtx_tree_ = vtx_tree;
+
   vtx_tree->movePointerToTheTop(); 
   fitted_particle_ = vtx_tree->currentParticle();
   fitted_vtx_ = vtx_tree->currentDecayVertex();
@@ -34,6 +36,7 @@ KinVtxFitter::KinVtxFitter(const std::vector<reco::TransientTrack> tracks,
     success_ = false; 
     return;
   }
+
   fitted_state_ = fitted_particle_->currentState();
   fitted_children_ = vtx_tree->finalStateParticles();
   if(fitted_children_.size() != n_particles_) { 
