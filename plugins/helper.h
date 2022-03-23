@@ -37,6 +37,7 @@ constexpr float KSHORT_MASS = 0.497611;
 constexpr float X3872_MASS = 3.87165;
 constexpr float RHO_MASS = 0.77526;
 constexpr float JPSI_MASS = 3.096900;
+constexpr float B0_MASS = 5.27965;
 // S.P.'s code
 constexpr float KSHORT_SIGMA = 0.000013;
 // Guess
@@ -68,12 +69,29 @@ inline double cos_theta_2D(const FITTER& fitter, const reco::BeamSpot &bs, const
   return (den != 0.) ? delta.Dot(pt)/den : -2;
 }
 
+template<typename LORENTZ_VEC>
+inline double cos_theta_2D(float vx, float vy, float vz, const reco::BeamSpot &bs, const LORENTZ_VEC& p4) {
+  auto bs_pos = bs.position(vz);
+  math::XYZVector delta(vx - bs_pos.x(), vy - bs_pos.y(), 0.);
+  math::XYZVector pt(p4.Px(), p4.Py(), 0.);
+  double den = (delta.R() * pt.R());
+  return (den != 0.) ? delta.Dot(pt)/den : -2;
+}
+
 template<typename FITTER, typename LORENTZ_VEC>
 inline double cos_theta_2D(const FITTER& fitter, const reco::Vertex &pv, const LORENTZ_VEC& p4) {
   if(!fitter.success()) return -2;
   GlobalPoint point = fitter.fitted_vtx();
   math::XYZVector delta(point.x() - pv.x(), point.y() - pv.y(), 0.);
   math::XYZVector pt(p4.px(), p4.py(), 0.);
+  double den = (delta.R() * pt.R());
+  return (den != 0.) ? delta.Dot(pt)/den : -2;
+}
+
+template<typename LORENTZ_VEC>
+inline double cos_theta_2D(float vx, float vy, float vz, const reco::Vertex &pv, const LORENTZ_VEC& p4) {
+  math::XYZVector delta(vx - pv.x(), vy - pv.y(), 0.);
+  math::XYZVector pt(p4.Px(), p4.Py(), 0.);
   double den = (delta.R() * pt.R());
   return (den != 0.) ? delta.Dot(pt)/den : -2;
 }
