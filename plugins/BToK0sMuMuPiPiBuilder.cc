@@ -186,7 +186,8 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     if (vtx_tree->isEmpty() || !vtx_tree->isValid() || !vtx_tree->isConsistent()) continue;
     
     vtx_tree->movePointerToTheTop();
-    cand.addUserFloat("fitted_mass_womc", vtx_tree->currentParticle()->currentState().mass());   
+    float mass_womc = vtx_tree->currentParticle()->currentState().mass();
+    cand.addUserFloat("fitted_mass_womc", mass_womc);   
 
     // Now refit with J/Psi mass constraint                   
     B_candidate = B_candidate_init;
@@ -206,7 +207,7 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     fit_p4.SetPtEtaPhiM(fitted_candidate.globalMomentum().perp(), 
 			fitted_candidate.globalMomentum().eta(),
 			fitted_candidate.globalMomentum().phi(),
-			B0_MASS);
+			mass_womc);
     cand.addUserFloat("fitted_pt"  , fit_p4.Perp()); 
     cand.addUserFloat("fitted_eta" , fit_p4.Eta());
     cand.addUserFloat("fitted_phi" , fit_p4.Phi());
