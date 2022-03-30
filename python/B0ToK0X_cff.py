@@ -25,7 +25,7 @@ K0sToPiPi = cms.EDProducer(
     dimuons = cms.InputTag('muonPairsForJPsiMuMu', 'SelectedDiMuons'),
     svSrc = cms.InputTag("slimmedKshortVertices"),
     postVtxSelection = cms.string('userFloat("sv_prob") > 1.e-2'
-                                  ' && (  (userFloat("fitted_mass")<0.700 && userFloat("fitted_mass")>0.300))'
+                                  ' && (  (userFloat("fitted_mass_womc")<0.700 && userFloat("fitted_mass_womc")>0.300))'
                               )
 )
 
