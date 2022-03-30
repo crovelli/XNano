@@ -101,8 +101,10 @@ void K0sBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &
     }
     if(!pi1TT.isValid()) continue;
     if(!pi2TT.isValid()) continue;
-    
-    
+
+    // K0s candidate
+    pat::CompositeCandidate k0s_tempcand;
+
     // Vertex fit without mass constraint
     KinVtxFitter fitterNMC(
 			   {pi1TT, pi2TT},
@@ -110,7 +112,8 @@ void K0sBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &
 			   {PI_SIGMA, PI_SIGMA} 
 			   );
     if ( !fitterNMC.success() ) continue;           
-
+    float fitted_mass_womc = fitterNMC.fitted_candidate().mass();
+    k0s_tempcand.addUserFloat("fitted_mass_womc", fitted_mass_womc);
 
     // Vertex fit refinement, adding mass constraint
     KinVtxFitterWithMassConstraint fitter(KSHORT_MASS, KSHORT_SIGMA, fitterNMC.vtx_tree());
@@ -125,7 +128,6 @@ void K0sBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &
     RefCountedKinematicVertex fitted_vtx = fitter.fitted_refvtx();
 
     // Selection after fit 
-    pat::CompositeCandidate k0s_tempcand;
     k0s_tempcand.addUserFloat("sv_prob", fitter.prob());    
     k0s_tempcand.addUserFloat("fitted_mass", fitter.fitted_candidate().mass() );
     if( !post_vtx_selection_(k0s_tempcand) ) continue;
@@ -176,6 +178,7 @@ void K0sBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &
       
       // Infos after final fit
       k0s_cand.addUserFloat("sv_prob", fitter.prob());    
+      k0s_cand.addUserFloat("fitted_mass_womc", fitted_mass_womc);
       k0s_cand.addUserFloat("fitted_mass", fitter.fitted_candidate().mass() );
       k0s_cand.addUserFloat("fitted_pt",  p4k0s.Pt());
       k0s_cand.addUserFloat("fitted_eta", p4k0s.Eta());     
