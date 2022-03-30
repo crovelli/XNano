@@ -95,7 +95,7 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       KinVtxFitter fitter(
 			  {ttracks->at(l1_idx), ttracks->at(l2_idx)},
 			  {l1_ptr->mass(), l2_ptr->mass()},
-			  {LEP_SIGMA, LEP_SIGMA} //some small sigma for the particle mass
+			  {LEP_SIGMA, LEP_SIGMA}     //some small sigma for the particle mass
 			  );
       if ( !fitter.success() ) continue;
 
@@ -105,14 +105,6 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       muon_pair.addUserFloat("sv_prob", fitter.prob());
       muon_pair.addUserFloat("fitted_mass", fitter.success() ? fitter.fitted_candidate().mass() : -1);
       muon_pair.addUserFloat("fitted_massErr", fitter.success() ? sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)) : -1);
-
-      // refitted daughters (leptons)     
-      // std::vector<std::string> dnames{ "l1", "l2" };
-      // for (size_t idaughter=0; idaughter<dnames.size(); idaughter++){
-      // muon_pair.addUserFloat("fitted_" + dnames[idaughter] + "_pt" ,fitter.daughter_p4(idaughter).pt() );
-      // muon_pair.addUserFloat("fitted_" + dnames[idaughter] + "_eta",fitter.daughter_p4(idaughter).eta() );
-      // muon_pair.addUserFloat("fitted_" + dnames[idaughter] + "_phi",fitter.daughter_p4(idaughter).phi() );
-      // }
 
       // cut on the SV info
       if( !post_vtx_selection_(muon_pair) ) continue;
