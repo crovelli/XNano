@@ -47,6 +47,7 @@ muonXTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         pfRelIso04_all = Var("(pfIsolationR04().sumChargedHadronPt + max(pfIsolationR04().sumNeutralHadronEt + pfIsolationR04().sumPhotonEt - pfIsolationR04().sumPUPt/2,0.0))/pt",float,doc="PF relative isolation dR=0.4, total (deltaBeta corrections)"),
         isGlobal = Var("userInt('isGlobal')",bool,doc="muon is global muon"),
         softId = Var("passed('SoftCutBasedId')",bool,doc="soft cut-based ID"), 
+        looseId = Var("userInt('looseId')",bool,doc="loose cut-based ID"),                         
                          
         highQualityTrack = Var("userInt('highQualityTrack')",int,doc="muon track is high quality"),                 
 

@@ -319,9 +319,11 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     int isPFcand = (int) muon.isPFMuon();
     int isGlobal = (int) muon.isGlobalMuon();
     int isTracker = (int) muon.isTrackerMuon();
+    int isLoose = (int)muon.isLooseMuon();
     muons_out->back().addUserInt("isPFcand", isPFcand);    
     muons_out->back().addUserInt("isGlobal", isGlobal);    
     muons_out->back().addUserInt("isTracker", isTracker);    
+    muons_out->back().addUserInt("looseId", isLoose);    
 
     for(unsigned int i=0; i<HLTPaths_.size(); i++){muons_out->back().addUserInt(HLTPaths_[i],fires[iMuo][i]);}
     trans_muons_out->emplace_back(muonTT);
