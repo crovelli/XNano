@@ -293,7 +293,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     if( muon.pt()<ptMin_ ) continue;
     if( fabs(muon.eta())>absEtaMax_ ) continue;
     //if( !((muon.track())->highPurity()) ) continue;      // chiara: to-be-done
-
     
     // match with triggering muons
     bool SkipMuon=true;
@@ -316,6 +315,13 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     muons_out->back().addUserFloat("DR",muonDR[iMuo]);
     muons_out->back().addUserFloat("DPT",muonDPT[iMuo]);
     muons_out->back().addUserInt("highQualityTrack",highQuality_track[iMuo]); 
+
+    int isPFcand = (int) muon.isPFMuon();
+    int isGlobal = (int) muon.isGlobalMuon();
+    int isTracker = (int) muon.isTrackerMuon();
+    muons_out->back().addUserInt("isPFcand", isPFcand);    
+    muons_out->back().addUserInt("isGlobal", isGlobal);    
+    muons_out->back().addUserInt("isTracker", isTracker);    
 
     for(unsigned int i=0; i<HLTPaths_.size(); i++){muons_out->back().addUserInt(HLTPaths_[i],fires[iMuo][i]);}
     trans_muons_out->emplace_back(muonTT);
