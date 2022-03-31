@@ -5,12 +5,14 @@
 #include "RecoVertex/KinematicFitPrimitives/interface/RefCountedKinematicVertex.h"
 #include "RecoVertex/KinematicFitPrimitives/interface/KinematicState.h"
 #include "RecoVertex/KinematicFitPrimitives/interface/RefCountedKinematicParticle.h"
+#include "RecoVertex/KinematicFitPrimitives/interface/RefCountedKinematicTree.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include <vector>
 
 class KinVtxFitter {
 public: 
   KinVtxFitter():
+    vtx_tree_{},
     fitted_vtx_{}, 
     fitted_state_{},
     fitted_particle_{},
@@ -48,6 +50,10 @@ public:
 
   const KinematicState fitted_candidate() const {
     return fitted_state_;
+  }
+
+  const RefCountedKinematicTree vtx_tree() const {
+    return vtx_tree_;
   }
 
   const RefCountedKinematicVertex fitted_refvtx() const {
@@ -89,6 +95,7 @@ private:
   size_t n_particles_ = 0;
   bool success_ = false;
 
+  RefCountedKinematicTree vtx_tree_;
   RefCountedKinematicVertex fitted_vtx_; 
   KinematicState fitted_state_;
   RefCountedKinematicParticle fitted_particle_;
