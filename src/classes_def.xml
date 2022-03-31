@@ -8,5 +8,8 @@
  <class name="KinVtxFitter"/>
  <class name="std::vector<KinVtxFitter>"/>
  <class name="edm::Wrapper<std::vector<KinVtxFitter> >"/>
+ <class name="KinVtxFitterWithMassConstraint"/>
+ <class name="std::vector<KinVtxFitterWithMassConstraint>"/>
+ <class name="edm::Wrapper<std::vector<KinVtxFitterWithMassConstraint> >"/>
  
 </lcgdict>
