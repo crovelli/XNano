@@ -3,7 +3,7 @@ from PhysicsTools.NanoAOD.common_cff import *
 
 Path2016=["HLT_Dimuon16_Jpsi","HLT_Dimuon10_Jpsi_Barrel","HLT_DoubleMu4_JpsiTrk_Displaced","HLT_Dimuon20_Jpsi","HLT_DoubleMu4_3_Jpsi_Displaced","HLT_DoubleMu4_3_Jpsi","HLT_DoubleMu4_Jpsi_Displaced","HLT_Dimuon13_PsiPrime","HLT_Dimuon8_PsiPrime_Barrel","HLT_DoubleMu4_PsiPrimeTrk_Displaced","HLT_Dimuon0_Jpsi_Muon","HLT_Dimuon6_Jpsi_NoVertexing","HLT_Dimuon0er16_Jpsi_NoOS_NoVertexing","HLT_Dimuon0er16_Jpsi_NoVertexing"]
 
-Path2017=["HLT_Dimuon25_Jpsi","HLT_Dimuon20_Jpsi_Barrel_Seagulls","HLT_DoubleMu4_JpsiTrk_Displaced","HLT_DoubleMu4_JpsiTrkTrk_Displaced","HLT_DoubleMu4_3_Jpsi_Displaced","HLT_DoubleMu4_3_Jpsi","HLT_DoubleMu4_Jpsi_Displaced","HLT_Dimuon18_PsiPrime","HLT_Dimuon10_PsiPrime_Barrel_Seagulls","HLT_DoubleMu4_PsiPrimeTrk_Displaced","HLT_Dimuon0_Jpsi3p5_Muon2","HLT_DoubleMu2_Jpsi_DoubleTkMu0_Phi","HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi","HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05"]
+Path2017=["HLT_Dimuon25_Jpsi","HLT_Dimuon20_Jpsi_Barrel_Seagulls","HLT_DoubleMu4_JpsiTrk_Displaced","HLT_DoubleMu4_JpsiTrkTrk_Displaced","HLT_DoubleMu4_3_Jpsi_Displaced","HLT_DoubleMu4_3_Jpsi","HLT_DoubleMu4_Jpsi_Displaced","HLT_Dimuon18_PsiPrime","HLT_Dimuon10_PsiPrime_Barrel_Seagulls","HLT_DoubleMu4_PsiPrimeTrk_Displaced","HLT_Dimuon0_Jpsi3p5_Muon2","HLT_DoubleMu2_Jpsi_DoubleTkMu0_Phi","HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi","HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05","HLT_DoubleMu4_3_Bs"]
 
 Path=Path2017
 
@@ -67,6 +67,7 @@ muonXTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         fired_HLT_DoubleMu2_Jpsi_DoubleTkMu0_Phi = Var("userInt('HLT_DoubleMu2_Jpsi_DoubleTkMu0_Phi')",int,doc="reco muon fired this trigger"),
         fired_HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi = Var("userInt('HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi')",int,doc="reco muon fired this trigger"),
         fired_HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05 = Var("userInt('HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05')",int,doc="reco muon fired this trigger"),
+        fired_HLT_DoubleMu4_3_Bs = Var("userInt('HLT_DoubleMu4_3_Bs')",int,doc="reco  muon fired this trigger"),
     ),
 )
 

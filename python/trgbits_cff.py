@@ -19,7 +19,8 @@ trgTable = cms.EDProducer( "TrgBitTableProducer",
                                              "HLT_Dimuon0_Jpsi3p5_Muon2",                # triple-mu (jpsi + muon)
                                              "HLT_DoubleMu2_Jpsi_DoubleTkMu0_Phi",       # jpsi + 2 trkmu (phi->mumu)
                                              "HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi",        # jpsi+2 trk(phi->KK) for 2017 
-                                             "HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05"     # jpsi+2 trk(phi->KK) for 2018
+                                             "HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05",    # jpsi+2 trk(phi->KK) for 2018
+                                             "HLT_DoubleMu4_3_Bs"                        # Livia 
                                               ),
 
                           # interesting paths for 2016 
