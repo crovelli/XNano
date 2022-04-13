@@ -1,17 +1,26 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
+Path2016=["HLT_DoubleMu4_JpsiTrk_Displaced","HLT_DoubleMu4_PsiPrimeTrk_Displaced"]
+
+Path2017=["HLT_DoubleMu4_JpsiTrk_Displaced","HLT_DoubleMu4_PsiPrimeTrk_Displaced","HLT_DoubleMu4_JpsiTrkTrk_Displaced"]
+
+Path=Path2017
+
 tracksX = cms.EDProducer('TrackMerger',
                          beamSpot   = cms.InputTag("offlineBeamSpot"),
-                         trgMuon    = cms.InputTag("muonTrgSelector:trgMuons"),
                          tracks     = cms.InputTag("packedPFCandidates"),
                          lostTracks = cms.InputTag("lostTracks"),
-                         trkPtCut = cms.double(0.4),
+                         ## trigger match  
+                         bits = cms.InputTag("TriggerResults","","HLT"), 
+                         objects = cms.InputTag("slimmedPatTrigger"), 
+                         drForTriggerMatch = cms.double(0.1),           # to be tuned
+                         HLTPaths=cms.vstring(Path),
+                         #
+                         trkPtCut = cms.double(0.5),
                          trkEtaCut = cms.double(3.0),
                          muons      = cms.InputTag("slimmedMuons"),
                          vertices   = cms.InputTag("offlineSlimmedPrimaryVertices"),
-                         dzTrg_cleaning = cms.double(-1.),    # was 1
-                         drTrg_Cleaning = cms.double(-1.),    # was 0.03
                          dcaSig = cms.double(-1.),
                          trkNormChiMin = cms.int32(-1),
                          trkNormChiMax = cms.int32(-1)
@@ -31,14 +40,13 @@ trackXTable = cms.EDProducer(
         vx = Var("vx()", float, doc="x coordinate of vertex position, in cm", precision=10),
         vy = Var("vy()", float, doc="y coordinate of vertex position, in cm", precision=10),
         vz = Var("vz()", float, doc="z coordinate of vertex position, in cm", precision=10),
-        isPacked = Var("userInt('isPacked')",int,doc="track from packedCandidate collection", precision=10),
-        isLostTrk = Var("userInt('isLostTrk')",int,doc="track from lostTrack collection", precision=10),
-        DCASig=Var("userFloat('DCASig')", float,doc="significance of xy-distance of closest approach wrt beamspot", precision=10),
-        dzTrg = Var("userFloat('dzTrg')", float,doc="dz from the corresponding trigger muon, in cm", precision=10),
         isMatchedToMuon = Var("userInt('isMatchedToMuon')",bool,doc="track was used to build a muon", precision=10),
         isMatchedToLooseMuon = Var("userInt('isMatchedToLooseMuon')",bool,doc="track was used to build a muon passing LooseID", precision=10),
         isMatchedToSoftMuon = Var("userInt('isMatchedToSoftMuon')",bool,doc="track was used to build a muon passing softID", precision=10),
         nValidHits = Var("userInt('nValidHits')", int,doc="Number of valid hits on track", precision=10),
+        fired_HLT_DoubleMu4_JpsiTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrk_Displaced')",int,doc="reco track fired this trigger"),
+        fired_HLT_DoubleMu4_PsiPrimeTrk_Displaced = Var("userInt('HLT_DoubleMu4_PsiPrimeTrk_Displaced')",int,doc="reco track fired this trigger"),
+        fired_HLT_DoubleMu4_JpsiTrkTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrkTrk_Displaced')",int,doc="reco track fired this trigger"),
     ),
 )
 
