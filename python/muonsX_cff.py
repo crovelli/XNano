@@ -1,9 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
-Path2016=["HLT_Dimuon16_Jpsi","HLT_Dimuon10_Jpsi_Barrel","HLT_DoubleMu4_JpsiTrk_Displaced","HLT_Dimuon20_Jpsi","HLT_DoubleMu4_3_Jpsi_Displaced","HLT_DoubleMu4_3_Jpsi","HLT_DoubleMu4_Jpsi_Displaced","HLT_Dimuon13_PsiPrime","HLT_Dimuon8_PsiPrime_Barrel","HLT_DoubleMu4_PsiPrimeTrk_Displaced","HLT_Dimuon0_Jpsi_Muon","HLT_Dimuon6_Jpsi_NoVertexing","HLT_Dimuon0er16_Jpsi_NoOS_NoVertexing","HLT_Dimuon0er16_Jpsi_NoVertexing"]
+Path2016=["HLT_Dimuon16_Jpsi","HLT_Dimuon13_PsiPrime","HLT_DoubleMu4_JpsiTrk_Displaced","HLT_DoubleMu4_PsiPrimeTrk_Displaced"]
 
-Path2017=["HLT_Dimuon25_Jpsi","HLT_Dimuon20_Jpsi_Barrel_Seagulls","HLT_DoubleMu4_JpsiTrk_Displaced","HLT_DoubleMu4_JpsiTrkTrk_Displaced","HLT_DoubleMu4_3_Jpsi_Displaced","HLT_DoubleMu4_3_Jpsi","HLT_DoubleMu4_Jpsi_Displaced","HLT_Dimuon18_PsiPrime","HLT_Dimuon10_PsiPrime_Barrel_Seagulls","HLT_DoubleMu4_PsiPrimeTrk_Displaced","HLT_Dimuon0_Jpsi3p5_Muon2","HLT_DoubleMu2_Jpsi_DoubleTkMu0_Phi","HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi","HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05","HLT_DoubleMu4_3_Bs"]
+Path2017=["HLT_Dimuon25_Jpsi","HLT_Dimuon18_PsiPrime","HLT_DoubleMu4_JpsiTrk_Displaced","HLT_DoubleMu4_PsiPrimeTrk_Displaced","HLT_DoubleMu4_JpsiTrkTrk_Displaced"]
 
 Path=Path2017
 
@@ -16,19 +16,12 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  drForTriggerMatch = cms.double(0.1),        # to be tuned
 
                                  ## for the output selected collection 
-                                 dzForCleaning_wrtTrgMuon = cms.double(-1.),     # chiara: to be used when trigger match is fixed
                                  ptMin = cms.double(0.5),                            
                                  absEtaMax = cms.double(2.4),
 
                                  HLTPaths=cms.vstring(Path)
                              )
 
-# at least 1 triggering muon
-countTrgMuons = cms.EDFilter("PATCandViewCountFilter",
-    minNumber = cms.uint32(1),       
-    maxNumber = cms.uint32(999999),
-    src = cms.InputTag("muonTrgSelector", "trgMuons")
-)
 
 # muons selection
 muonXTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
@@ -38,7 +31,7 @@ muonXTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     doc  = cms.string("slimmedMuons for X analysis after basic selection"),
     singleton = cms.bool(False),         
     extension = cms.bool(False),         
-    variables = cms.PSet(CandVars,
+        variables = cms.PSet(CandVars,
         ptErr   = Var("bestTrack().ptError()", float, doc = "ptError of the muon track", precision=6),
         vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
         vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
@@ -49,25 +42,12 @@ muonXTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         softId = Var("passed('SoftCutBasedId')",bool,doc="soft cut-based ID"), 
         looseId = Var("userInt('looseId')",bool,doc="loose cut-based ID"),
 
-        highQualityTrack = Var("userInt('highQualityTrack')",int,doc="muon track is high quality"),                 
-
-        isTriggering = Var("userInt('isTriggering')", int,doc="flag the reco muon is also triggering"),
-
         fired_HLT_Dimuon25_Jpsi = Var("userInt('HLT_Dimuon25_Jpsi')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Dimuon20_Jpsi_Barrel_Seagulls = Var("userInt('HLT_Dimuon20_Jpsi_Barrel_Seagulls')",int,doc="reco muon fired this trigger"),
-        fired_HLT_DoubleMu4_JpsiTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrk_Displaced')",int,doc="reco muon fired this trigger"),
-        fired_HLT_DoubleMu4_JpsiTrkTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrkTrk_Displaced')",int,doc="reco muon fired this trigger"),
-        fired_HLT_DoubleMu4_3_Jpsi_Displaced = Var("userInt('HLT_DoubleMu4_3_Jpsi_Displaced')",int,doc="reco muon fired this trigger"),
-        fired_HLT_DoubleMu4_3_Jpsi = Var("userInt('HLT_DoubleMu4_3_Jpsi')",int,doc="reco muon fired this trigger"),
-        fired_HLT_DoubleMu4_Jpsi_Displaced = Var("userInt('HLT_DoubleMu4_Jpsi_Displaced')",int,doc="reco muon fired this trigger"),
         fired_HLT_Dimuon18_PsiPrime = Var("userInt('HLT_Dimuon18_PsiPrime')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Dimuon10_PsiPrime_Barrel_Seagulls = Var("userInt('HLT_Dimuon10_PsiPrime_Barrel_Seagulls')",int,doc="reco muon fired this trigger"),
+
+        fired_HLT_DoubleMu4_JpsiTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrk_Displaced')",int,doc="reco muon fired this trigger"),
         fired_HLT_DoubleMu4_PsiPrimeTrk_Displaced = Var("userInt('HLT_DoubleMu4_PsiPrimeTrk_Displaced')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Dimuon0_Jpsi3p5_Muon2 = Var("userInt('HLT_Dimuon0_Jpsi3p5_Muon2')",int,doc="reco muon fired this trigger"),
-        fired_HLT_DoubleMu2_Jpsi_DoubleTkMu0_Phi = Var("userInt('HLT_DoubleMu2_Jpsi_DoubleTkMu0_Phi')",int,doc="reco muon fired this trigger"),
-        fired_HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi = Var("userInt('HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi')",int,doc="reco muon fired this trigger"),
-        fired_HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05 = Var("userInt('HLT_DoubleMu2_Jpsi_DoubleTrk1_Phi1p05')",int,doc="reco muon fired this trigger"),
-        fired_HLT_DoubleMu4_3_Bs = Var("userInt('HLT_DoubleMu4_3_Bs')",int,doc="reco  muon fired this trigger"),
+        fired_HLT_DoubleMu4_JpsiTrkTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrkTrk_Displaced')",int,doc="reco muon fired this trigger"),
     ),
 )
 
@@ -98,20 +78,7 @@ selectedMuonsMCMatchEmbedded = cms.EDProducer(
     matching = cms.InputTag('muonsXMCMatchForTable')
 )
 
-muonTriggerMatchedTable = muonXTable.clone(
-    src = cms.InputTag("muonTrgSelector:trgMuons"),
-    name = cms.string("TriggerMuon"),
-    doc  = cms.string("HLT Muons matched with reco muons"), #reco muon matched to triggering muon"),
-    variables = cms.PSet(CandVars,
-        vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
-        vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
-        vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6)
-   )
-)
 
-
-#muonXSequence = cms.Sequence(muonTrgSelector * countTrgMuons) # chiara
 muonXSequence = cms.Sequence(muonTrgSelector)
 muonXMC = cms.Sequence(muonXSequence + muonsXMCMatchForTable + selectedMuonsMCMatchEmbedded + muonXMCTable)
 muonXTables = cms.Sequence(muonXTable)
-muonTriggerMatchedTables = cms.Sequence(muonTriggerMatchedTable)   
