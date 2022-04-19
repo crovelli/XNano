@@ -53,7 +53,7 @@ void PiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   evt.getByToken(dimuons_, dimuons);  
   edm::Handle<pat::CompositeCandidateCollection> pfcands;
   evt.getByToken(pfcands_, pfcands);  
-  
+
   // output
   std::unique_ptr<pat::CompositeCandidateCollection> pipi_out(new pat::CompositeCandidateCollection());
   
@@ -135,6 +135,14 @@ void PiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
 	pipi_cand.addUserFloat("pi2_vx",  trk2_ptr->vx()); 
 	pipi_cand.addUserFloat("pi2_vy",  trk2_ptr->vy()); 
 	pipi_cand.addUserFloat("pi2_vz",  trk2_ptr->vz()); 
+	pipi_cand.addUserFloat("pi1_d0sig", trk1_ptr->userFloat("d0sig"));
+	pipi_cand.addUserFloat("pi2_d0sig", trk2_ptr->userFloat("d0sig"));
+	pipi_cand.addUserInt("p1_fired_DoubleMu4_JpsiTrk_Displaced",     trk1_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced"));
+	pipi_cand.addUserInt("p1_fired_DoubleMu4_PsiPrimeTrk_Displaced", trk1_ptr->userInt("HLT_DoubleMu4_PsiPrimeTrk_Displaced"));
+	pipi_cand.addUserInt("p1_fired_DoubleMu4_JpsiTrkTrk_Displaced",  trk1_ptr->userInt("HLT_DoubleMu4_JpsiTrkTrk_Displaced"));
+	pipi_cand.addUserInt("p2_fired_DoubleMu4_JpsiTrk_Displaced",     trk2_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced"));
+	pipi_cand.addUserInt("p2_fired_DoubleMu4_PsiPrimeTrk_Displaced", trk2_ptr->userInt("HLT_DoubleMu4_PsiPrimeTrk_Displaced"));
+	pipi_cand.addUserInt("p2_fired_DoubleMu4_JpsiTrkTrk_Displaced",  trk2_ptr->userInt("HLT_DoubleMu4_JpsiTrkTrk_Displaced"));
 
 	// Put in the event
 	pipi_out->push_back(pipi_cand);
