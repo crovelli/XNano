@@ -21,7 +21,6 @@ tracksX = cms.EDProducer('TrackMerger',
                          trkEtaCut = cms.double(3.0),
                          muons      = cms.InputTag("slimmedMuons"),
                          vertices   = cms.InputTag("offlineSlimmedPrimaryVertices"),
-                         dcaSig = cms.double(-1.),
                          trkNormChiMin = cms.int32(-1),
                          trkNormChiMax = cms.int32(-1)
                         )
@@ -44,6 +43,7 @@ trackXTable = cms.EDProducer(
         isMatchedToLooseMuon = Var("userInt('isMatchedToLooseMuon')",bool,doc="track was used to build a muon passing LooseID", precision=10),
         isMatchedToSoftMuon = Var("userInt('isMatchedToSoftMuon')",bool,doc="track was used to build a muon passing softID", precision=10),
         nValidHits = Var("userInt('nValidHits')", int,doc="Number of valid hits on track", precision=10),
+        d0sig = Var("userFloat('d0sig')", float, doc="d0 significance", precision=10),
         fired_HLT_DoubleMu4_JpsiTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrk_Displaced')",int,doc="reco track fired this trigger"),
         fired_HLT_DoubleMu4_PsiPrimeTrk_Displaced = Var("userInt('HLT_DoubleMu4_PsiPrimeTrk_Displaced')",int,doc="reco track fired this trigger"),
         fired_HLT_DoubleMu4_JpsiTrkTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrkTrk_Displaced')",int,doc="reco track fired this trigger"),
