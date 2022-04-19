@@ -24,6 +24,7 @@
 #include "DataFormats/PatCandidates/interface/TriggerPath.h"
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 #include "DataFormats/PatCandidates/interface/TriggerAlgorithm.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
@@ -48,8 +49,10 @@ private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
   
   edm::EDGetTokenT<std::vector<pat::Muon>> muonSrc_;
+  const edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
   edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
   edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
+  
   
   // for trigger match
   std::vector<std::string> HLTPaths_;
@@ -64,6 +67,7 @@ private:
 MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   muonSrc_( consumes<std::vector<pat::Muon>> ( iConfig.getParameter<edm::InputTag>( "muonCollection" ) ) ),
   //
+  beamSpotSrc_(consumes<reco::BeamSpot>( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
   triggerBits_(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("bits"))),
   triggerObjects_(consumes<std::vector<pat::TriggerObjectStandAlone>>(iConfig.getParameter<edm::InputTag>("objects"))),
   HLTPaths_(iConfig.getParameter<std::vector<std::string>>("HLTPaths")),
@@ -81,7 +85,11 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   
   edm::ESHandle<MagneticField> bFieldHandle;
   iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
-  
+
+  edm::Handle<reco::BeamSpot> beamSpotHandle;
+  iEvent.getByToken(beamSpotSrc_, beamSpotHandle);
+  const reco::BeamSpot& beamSpot = *beamSpotHandle;
+
   edm::Handle<edm::TriggerResults> triggerBits;
   iEvent.getByToken(triggerBits_, triggerBits);
   
@@ -268,6 +276,10 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     muons_out->back().addUserInt("isGlobal", isGlobal);    
     muons_out->back().addUserInt("isTracker", isTracker);    
     muons_out->back().addUserInt("looseId", isLoose);
+
+    // dr cut (same quantity as in HLTMuonDimuonL3Filter, to emulate HLT)
+    float mudr = fabs( (- (muon.vx()-beamSpot.x0()) * muon.py() + (muon.vy()-beamSpot.y0()) * muon.px() ) / muon.pt() );
+    muons_out->back().addUserFloat("dr", mudr);  
 
     for(unsigned int i=0; i<HLTPaths_.size(); i++){
       muons_out->back().addUserInt(HLTPaths_[i],fires[iMuo][i]);
