@@ -9,6 +9,7 @@ muonPairsForJPsiMuMu = cms.EDProducer(
     'DiMuonBuilder',
     src = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
     transientTracksSrc = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'),
+    beamSpot   = cms.InputTag("offlineBeamSpot"),
     lep1Selection = cms.string('pt > 2.5'),
     lep2Selection = cms.string('pt > 2.5'),
     preVtxSelection = cms.string('abs(userCand("l1").vz - userCand("l2").vz) <= 1. && mass() < 5 '
@@ -44,6 +45,8 @@ candPiPi = cms.EDProducer(
 BToK0sMuMuPiPi = cms.EDProducer(
     'BToK0sMuMuPiPiBuilder',
 
+    pfcands= cms.InputTag('tracksX', 'SelectedTracks'),
+
     dimuons = cms.InputTag('muonPairsForJPsiMuMu', 'SelectedDiMuons'),
     muonTransientTracks = muonPairsForJPsiMuMu.transientTracksSrc,
 
@@ -67,7 +70,9 @@ BToK0sMuMuPiPi = cms.EDProducer(
 #        'userFloat("fit_cos3D_PV") >= 0'
 #        '&& userFloat("lxySign_PV") >= 3'
         'userFloat("lxySign_PV") >= 3'
-    )
+    ),
+    
+    drMatchTrack = cms.double(0.05)
 )
 
 
@@ -82,11 +87,6 @@ JPsiToMuMuTable = cms.EDProducer(
     singleton=cms.bool(False),
     extension=cms.bool(False),
     variables=cms.PSet(
-      # CandVars,
-      #fitted_mass = ufloat('fitted_mass'),
-      # svprob = ufloat('sv_prob'),        
-      #l1_idx = uint('l1_idx'),
-      #l2_idx = uint('l2_idx') 
     )
 )
 
@@ -99,15 +99,6 @@ K0sToPiPiTable = cms.EDProducer(
     singleton=cms.bool(False),
     extension=cms.bool(False),
     variables=cms.PSet(
-      #CandVars,
-      # fitted_nmc_mass = ufloat('fitted_nmc_mass'),
-      # svprob = ufloat('sv_prob'),         
-      #fitted_mass = ufloat('fitted_mass'),
-      # fitted_pt = ufloat('fitted_pt'),
-      # fitted_eta = ufloat('fitted_eta'),
-      # fitted_phi = ufloat('fitted_phi'),
-      #mumu_idx = uint('mumu_idx'),  
-      #pipi_idx = uint('pipi_idx')
     )
 )
 
@@ -120,10 +111,6 @@ candPiPiTable = cms.EDProducer(
     singleton=cms.bool(False),
     extension=cms.bool(False),
     variables=cms.PSet(
-      #CandVars,
-      #trk1_idx = uint('trk1_idx'),
-      #trk2_idx = uint('trk2_idx'),   
-      #mumu_idx = uint('mumu_idx')   
     )
 )
 
@@ -208,6 +195,11 @@ BToK0sMuMuPiPiTable = cms.EDProducer(
         MuMu_prefit_mu2_pt  = ufloat('MuMu_prefit_mu2_pt'),
         MuMu_prefit_mu2_eta = ufloat('MuMu_prefit_mu2_eta'),
         MuMu_prefit_mu2_phi = ufloat('MuMu_prefit_mu2_phi'),
+        MuMu_mu1_dr = ufloat('MuMu_mu1_dr'),
+        MuMu_mu2_dr = ufloat('MuMu_mu2_dr'),
+        MuMu_DCA = ufloat('MuMu_DCA'),
+        MuMu_LxySign = ufloat('MuMu_LxySign'),
+        MuMu_cosAlpha = ufloat('MuMu_cosAlpha'),
         # pipi   
         PiPi_prefit_pi1_pt  = ufloat('PiPi_prefit_pi1_pt'),
         PiPi_prefit_pi1_eta = ufloat('PiPi_prefit_pi1_eta'),
@@ -221,8 +213,15 @@ BToK0sMuMuPiPiTable = cms.EDProducer(
         PiPi_prefit_pi2_vx  = ufloat('PiPi_prefit_pi2_vx'),
         PiPi_prefit_pi2_vy  = ufloat('PiPi_prefit_pi2_vy'),
         PiPi_prefit_pi2_vz  = ufloat('PiPi_prefit_pi2_vz'),
-        #PiPi_prefit_pi1_ipsign = ufloat('PiPi_prefit_pi1_ipsign'),
-        #PiPi_prefit_pi2_ipsign = ufloat('PiPi_prefit_pi2_ipsign'),
+        PiPi_pi1_d0sig      = ufloat('PiPi_pi1_d0sig'),
+        PiPi_pi2_d0sig      = ufloat('PiPi_pi2_d0sig'),
+        PiPi_p1_fired_DoubleMu4_JpsiTrk_Displaced     = uint('PiPi_p1_fired_DoubleMu4_JpsiTrk_Displaced'),
+        PiPi_p1_fired_DoubleMu4_PsiPrimeTrk_Displaced = uint('PiPi_p1_fired_DoubleMu4_PsiPrimeTrk_Displaced'),
+        PiPi_p1_fired_DoubleMu4_JpsiTrkTrk_Displaced  = uint('PiPi_p1_fired_DoubleMu4_JpsiTrkTrk_Displaced'),
+        PiPi_p2_fired_DoubleMu4_JpsiTrk_Displaced     = uint('PiPi_p2_fired_DoubleMu4_JpsiTrk_Displaced'),
+        PiPi_p2_fired_DoubleMu4_PsiPrimeTrk_Displaced = uint('PiPi_p2_fired_DoubleMu4_PsiPrimeTrk_Displaced'),
+        PiPi_p2_fired_DoubleMu4_JpsiTrkTrk_Displaced  = uint('PiPi_p2_fired_DoubleMu4_JpsiTrkTrk_Displaced'),
+
         # K0s
         K0s_nmcFitted_mass = ufloat('K0s_nmcFitted_mass'),
         K0s_nmcFitted_pi1pt  = ufloat('K0s_nmcFitted_pi1pt'),
@@ -241,9 +240,19 @@ BToK0sMuMuPiPiTable = cms.EDProducer(
         K0s_mcFitted_vtxZ = ufloat('K0s_mcFitted_vtxZ'),
         K0s_mcFitted_vtxXE = ufloat('K0s_mcFitted_vtxXE'),
         K0s_mcFitted_vtxYE = ufloat('K0s_mcFitted_vtxYE'),
-        K0s_mcFitted_vtxZE = ufloat('K0s_mcFitted_vtxZE') #,
-        #K0s_prefit_pi1_ipsign = ufloat('K0s_prefit_pi1_ipsign'),
-        #K0s_prefit_pi2_ipsign = ufloat('K0s_prefit_pi2_ipsign')
+        K0s_mcFitted_vtxZE = ufloat('K0s_mcFitted_vtxZE'),
+        K0s_matchTrack1_D0sign = ufloat('K0s_matchTrack1_D0sign'),
+        K0s_matchTrack2_D0sign = ufloat('K0s_matchTrack2_D0sign'),
+        K0s_matchTrack1_pt  = ufloat('K0s_matchTrack1_pt'),
+        K0s_matchTrack2_pt  = ufloat('K0s_matchTrack2_pt'),
+        K0s_matchTrack1_eta = ufloat('K0s_matchTrack1_eta'),
+        K0s_matchTrack2_eta = ufloat('K0s_matchTrack2_eta'),
+        K0s_matchTrack1_fired_DoubleMu4_JpsiTrk_Displaced = uint('K0s_matchTrack1_fired_DoubleMu4_JpsiTrk_Displaced'),
+        K0s_matchTrack1_fired_DoubleMu4_PsiPrimeTrk_Displaced = uint('K0s_matchTrack1_fired_DoubleMu4_PsiPrimeTrk_Displaced'),
+        K0s_matchTrack1_fired_DoubleMu4_JpsiTrkTrk_Displaced = uint('K0s_matchTrack1_fired_DoubleMu4_JpsiTrkTrk_Displaced'),
+        K0s_matchTrack2_fired_DoubleMu4_JpsiTrk_Displaced = uint('K0s_matchTrack2_fired_DoubleMu4_JpsiTrk_Displaced'),
+        K0s_matchTrack2_fired_DoubleMu4_PsiPrimeTrk_Displaced = uint('K0s_matchTrack2_fired_DoubleMu4_PsiPrimeTrk_Displaced'),
+        K0s_matchTrack2_fired_DoubleMu4_JpsiTrkTrk_Displaced = uint('K0s_matchTrack2_fired_DoubleMu4_JpsiTrkTrk_Displaced')
     )
 )
 
