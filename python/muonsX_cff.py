@@ -9,6 +9,7 @@ Path=Path2017
 
 muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  muonCollection = cms.InputTag("slimmedMuons"), 
+                                 beamSpot   = cms.InputTag("offlineBeamSpot"),
                                  bits = cms.InputTag("TriggerResults","","HLT"),
                                  objects = cms.InputTag("slimmedPatTrigger"),
                                  
