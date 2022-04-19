@@ -1,6 +1,4 @@
 // Merges the PFPackedCandidates and Lost tracks
-// beam spot readout in case dcasig to be calculated wrt beam spot
-// currently computed wrt triggeringMuon vertex
 
 #include "FWCore/Framework/interface/global/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -8,19 +6,20 @@
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/Utilities/interface/InputTag.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 #include "DataFormats/Common/interface/RefToPtr.h"
 #include "DataFormats/Common/interface/View.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
-#include "MagneticField/Engine/interface/MagneticField.h"
-#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
-#include "DataFormats/GeometryVector/interface/GlobalPoint.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/Common/interface/AssociationVector.h"
+#include "DataFormats/GeometryVector/interface/GlobalPoint.h"
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "TrackingTools/TrajectoryState/interface/FreeTrajectoryState.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/PatternTools/interface/TSCBLBuilderNoMaterial.h"
 
 #include "helper.h"
 
@@ -41,7 +40,6 @@ public:
     drForTriggerMatch_(cfg.getParameter<double>("drForTriggerMatch")),
     trkPtCut_(cfg.getParameter<double>("trkPtCut")),
     trkEtaCut_(cfg.getParameter<double>("trkEtaCut")),
-    dcaSig_(cfg.getParameter<double>("dcaSig")),
     trkNormChiMin_(cfg.getParameter<int>("trkNormChiMin")),
     trkNormChiMax_(cfg.getParameter<int>("trkNormChiMax")) 
   {
@@ -71,11 +69,9 @@ private:
   // selections                                                                 
   const double trkPtCut_;
   const double trkEtaCut_;
-  const double dcaSig_;
   const int trkNormChiMin_;
   const int trkNormChiMax_;
 };
-
 
 void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &stp) const {
 
@@ -85,10 +81,10 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   if ( ! beamSpotHandle.isValid() ) {
     edm::LogError("BToKstllProducer") << "No beam spot available from Event" ;
   }  
-  const reco::BeamSpot& beamSpot = *beamSpotHandle;
   
   edm::ESHandle<MagneticField> bFieldHandle;
   stp.get<IdealMagneticFieldRecord>().get(bFieldHandle);
+  const MagneticField* magField = bFieldHandle.product();
 
   edm::Handle<pat::PackedCandidateCollection> tracks;
   evt.getByToken(tracksToken_, tracks);
@@ -142,24 +138,13 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
 	 (trk.bestTrack()->normalizedChi2() > trkNormChiMax_ &&
 	  trkNormChiMax_>0)  )    continue; 
 
-    // high purity requirment applied only in packedCands
+    // high purity requirement applied only in packedCands
     if( iTrk < nTracks && !trk.trackHighPurity()) continue;
-
-    // distance closest approach in x,y wrt beam spot
-    const reco::TransientTrack trackTT( (*trk.bestTrack()) , &(*bFieldHandle));
-    std::pair<double,double> DCA = computeDCA(trackTT, beamSpot);
-    float DCABS = DCA.first;
-    float DCABSErr = DCA.second;
-    float DCASig = (DCABSErr != 0 && float(DCABSErr) == DCABSErr) ? fabs(DCABS/DCABSErr) : -1;
-    if (DCASig >  dcaSig_  && dcaSig_ >0) continue;
 
     // Selected tracks
     preselTracks.push_back(trk);  
   }
   unsigned int numPresTracks = preselTracks.size();
-
-  // std::cout << "totalTracks = " << totalTracks << ", presel = " << numPresTracks << std::endl;
-
 
 
   // First do trigger match, only for selected tracks
@@ -276,6 +261,20 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
       }
     }
 
+
+    // For HLT emulation
+    Basic3DVector<float> thepos( trk.bestTrack()->vertex());
+    GlobalPoint thegpos( thepos);
+    Basic3DVector<float> themom( trk.bestTrack()->momentum());
+    GlobalVector thegmom( themom);
+    GlobalTrajectoryParameters thepar( thegpos, thegmom, trk.bestTrack()->charge(), magField);
+    CurvilinearTrajectoryError theerr( trk.bestTrack()->covariance());
+    FreeTrajectoryState InitialFTS( thepar, theerr); 
+
+    TSCBLBuilderNoMaterial blsBuilder;
+    TrajectoryStateClosestToBeamLine tscb( blsBuilder(InitialFTS, *beamSpotHandle));
+    float d0sig = tscb.transverseImpactParameter().significance();
+
     pat::CompositeCandidate pcand;
     pcand.setP4(trk.p4());
     pcand.setCharge(trk.charge());
@@ -289,6 +288,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     pcand.addUserInt("isMatchedToLooseMuon", matchedToLooseMuon);
     pcand.addUserInt("isMatchedToSoftMuon",  matchedToSoftMuon);
     pcand.addUserInt("nValidHits", trk.bestTrack()->found());
+    pcand.addUserFloat("d0sig", d0sig);    
     // trigger match
     for(unsigned int i=0; i<HLTPaths_.size(); i++){
       pcand.addUserInt(HLTPaths_[i],fires[iTrk][i]);
@@ -313,6 +313,8 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   evt.put(std::move(tracks_out),       "SelectedTracks");
   evt.put(std::move(trans_tracks_out), "SelectedTransientTracks");
 }
+
+
 
 
 //define this as a plug-in
