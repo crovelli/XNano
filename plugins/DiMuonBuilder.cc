@@ -9,12 +9,15 @@
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/PatternTools/interface/ClosestApproachInRPhi.h"
 #include "RecoVertex/KinematicFitPrimitives/interface/RefCountedKinematicVertex.h"
 #include "RecoVertex/KinematicFitPrimitives/interface/KinematicState.h"
 
 #include <vector>
 #include <string>
+#include "TLorentzVector.h"
 
 #include "helper.h"
 #include "KinVtxFitter.h"
@@ -32,7 +35,8 @@ public:
     pre_vtx_selection_{cfg.getParameter<std::string>("preVtxSelection")},
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
     src_{consumes<MuonCollection>( cfg.getParameter<edm::InputTag>("src") )},
-    ttracks_src_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("transientTracksSrc") )} {
+    ttracks_src_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("transientTracksSrc") )},
+    beamSpotSrc_{consumes<reco::BeamSpot>( cfg.getParameter<edm::InputTag>("beamSpot") )}{
       produces<pat::CompositeCandidateCollection>("SelectedDiMuons");
     }
 
@@ -49,6 +53,7 @@ private:
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_;
   const edm::EDGetTokenT<MuonCollection> src_;
   const edm::EDGetTokenT<TransientTrackCollection> ttracks_src_;
+  const edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
 };
 
 void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &) const {
@@ -59,6 +64,10 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   
   edm::Handle<TransientTrackCollection> ttracks;
   evt.getByToken(ttracks_src_, ttracks);
+
+  edm::Handle<reco::BeamSpot> beamSpotHandle;
+  evt.getByToken(beamSpotSrc_, beamSpotHandle);
+  const reco::BeamSpot& beamSpot = *beamSpotHandle;
 
   // output
   std::unique_ptr<pat::CompositeCandidateCollection> ret_value(new pat::CompositeCandidateCollection());
@@ -99,12 +108,39 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 
       // save quantities after fit needed for selection and to be saved in the final ntuples
       KinematicState fitted_cand = fitter.fitted_candidate();
+      RefCountedKinematicVertex fitted_vtx = fitter.fitted_refvtx();
 
       muon_pair.addUserFloat("sv_prob", fitter.prob());
       muon_pair.addUserFloat("fitted_mass", fitter.success() ? fitted_cand.mass() : -1);
 
       // cut on the SV info
       if( !post_vtx_selection_(muon_pair) ) continue;
+
+
+      // DCA between the two muons (used at HLT)
+      float DCA = 10.;
+      TrajectoryStateClosestToPoint mu1TS = (ttracks->at(l1_idx)).impactPointTSCP();
+      TrajectoryStateClosestToPoint mu2TS = (ttracks->at(l2_idx)).impactPointTSCP();
+      if (mu1TS.isValid() && mu2TS.isValid()) {
+	ClosestApproachInRPhi cApp;
+	cApp.calculate(mu1TS.theState(), mu2TS.theState());
+	if (cApp.status()) DCA = cApp.distance();
+      }
+      muon_pair.addUserFloat("DCA", DCA); 
+
+      // Lxy (used at HLT)  
+      math::XYZVector pperp(l1_ptr->px() + l2_ptr->px(), l1_ptr->py() + l2_ptr->py(), 0.);
+      GlobalError fitted_vtx_err( fitted_vtx->error().cxx(), fitted_vtx->error().cyx(), fitted_vtx->error().cyy(), fitted_vtx->error().czx(), fitted_vtx->error().czy(), fitted_vtx->error().czz() );
+      GlobalPoint dispFromBS( -1*( (beamSpot.x0() - fitted_vtx->position().x()) + (fitted_vtx->position().z() - beamSpot.z0()) * beamSpot.dxdz()), -1*((beamSpot.y0() - fitted_vtx->position().y()) + (fitted_vtx->position().z() - beamSpot.z0()) * beamSpot.dydz()), 0);
+      float lxy = dispFromBS.perp();
+      float lxyerr = sqrt(fitted_vtx_err.rerr(dispFromBS));
+      float lxySign = lxy/lxyerr;
+      muon_pair.addUserFloat("LxySign", lxySign); 
+
+      // CosAlpha (used at HLT)  
+      reco::Vertex::Point vperp(dispFromBS.x(),dispFromBS.y(),0.);
+      float cosAlpha = vperp.Dot(pperp)/(vperp.R()*pperp.R());
+      muon_pair.addUserFloat("cosAlpha", cosAlpha); 
 
 
       // save further quantities, to be saved in the final ntuples: JPsi infos after fit
@@ -116,7 +152,6 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       muon_pair.addUserFloat("fitted_phi", B_J.Phi());
 
       // save further quantities, to be saved in the final ntuples: JPsi vertex after fit
-      RefCountedKinematicVertex fitted_vtx = fitter.fitted_refvtx();
       muon_pair.addUserFloat("fitted_vtxX",  fitted_vtx->position().x());
       muon_pair.addUserFloat("fitted_vtxY",  fitted_vtx->position().y());
       muon_pair.addUserFloat("fitted_vtxZ",  fitted_vtx->position().z());
@@ -129,11 +164,12 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       muon_pair.addUserFloat("mu1_pt",  l1_ptr->pt());
       muon_pair.addUserFloat("mu1_eta", l1_ptr->eta());
       muon_pair.addUserFloat("mu1_phi", l1_ptr->phi());
+      muon_pair.addUserFloat("mu1_dr",  l1_ptr->userFloat("dr"));
       muon_pair.addUserFloat("mu2_pt",  l2_ptr->pt());
       muon_pair.addUserFloat("mu2_eta", l2_ptr->eta());
       muon_pair.addUserFloat("mu2_phi", l2_ptr->phi());
+      muon_pair.addUserFloat("mu2_dr",  l2_ptr->userFloat("dr"));   
 
-      
       // push in the event
       ret_value->push_back(muon_pair);
     }
