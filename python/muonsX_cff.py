@@ -42,13 +42,6 @@ muonXTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         isGlobal = Var("userInt('isGlobal')",bool,doc="muon is global muon"),
         softId = Var("passed('SoftCutBasedId')",bool,doc="soft cut-based ID"), 
         looseId = Var("userInt('looseId')",bool,doc="loose cut-based ID"),
-
-        fired_HLT_Dimuon25_Jpsi = Var("userInt('HLT_Dimuon25_Jpsi')",int,doc="reco muon fired this trigger"),
-        fired_HLT_Dimuon18_PsiPrime = Var("userInt('HLT_Dimuon18_PsiPrime')",int,doc="reco muon fired this trigger"),
-
-        fired_HLT_DoubleMu4_JpsiTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrk_Displaced')",int,doc="reco muon fired this trigger"),
-        fired_HLT_DoubleMu4_PsiPrimeTrk_Displaced = Var("userInt('HLT_DoubleMu4_PsiPrimeTrk_Displaced')",int,doc="reco muon fired this trigger"),
-        fired_HLT_DoubleMu4_JpsiTrkTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrkTrk_Displaced')",int,doc="reco muon fired this trigger"),
     ),
 )
 

@@ -364,6 +364,17 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     cand.addUserFloat("MuMu_LxySign", ll_ptr->userFloat("LxySign"));
     cand.addUserFloat("MuMu_cosAlpha", ll_ptr->userFloat("cosAlpha"));
 
+    cand.addUserInt("MuMu_mu1_fired_Dimuon25_Jpsi",                   ll_ptr->userInt("mu1_fired_Dimuon25_Jpsi"));
+    cand.addUserInt("MuMu_mu1_fired_Dimuon18_PsiPrime",               ll_ptr->userInt("mu1_fired_Dimuon18_PsiPrime"));
+    cand.addUserInt("MuMu_mu1_fired_DoubleMu4_JpsiTrk_Displaced",     ll_ptr->userInt("mu1_fired_DoubleMu4_JpsiTrk_Displaced"));
+    cand.addUserInt("MuMu_mu1_fired_DoubleMu4_PsiPrimeTrk_Displaced", ll_ptr->userInt("mu1_fired_DoubleMu4_PsiPrimeTrk_Displaced"));
+    cand.addUserInt("MuMu_mu1_fired_DoubleMu4_JpsiTrkTrk_Displaced",  ll_ptr->userInt("mu1_fired_DoubleMu4_JpsiTrkTrk_Displaced"));
+    cand.addUserInt("MuMu_mu2_fired_Dimuon25_Jpsi",                   ll_ptr->userInt("mu2_fired_Dimuon25_Jpsi"));
+    cand.addUserInt("MuMu_mu2_fired_Dimuon18_PsiPrime",               ll_ptr->userInt("mu2_fired_Dimuon18_PsiPrime"));
+    cand.addUserInt("MuMu_mu2_fired_DoubleMu4_JpsiTrk_Displaced",     ll_ptr->userInt("mu2_fired_DoubleMu4_JpsiTrk_Displaced"));
+    cand.addUserInt("MuMu_mu2_fired_DoubleMu4_PsiPrimeTrk_Displaced", ll_ptr->userInt("mu2_fired_DoubleMu4_PsiPrimeTrk_Displaced"));
+    cand.addUserInt("MuMu_mu2_fired_DoubleMu4_JpsiTrkTrk_Displaced",  ll_ptr->userInt("mu2_fired_DoubleMu4_JpsiTrkTrk_Displaced"));
+
     // Save all wanted infos: PiPi (from Rho)-related
     cand.addUserFloat("PiPi_prefit_pi1_pt",  pipi_ptr->userFloat("pi1_pt"));
     cand.addUserFloat("PiPi_prefit_pi1_eta", pipi_ptr->userFloat("pi1_eta"));
@@ -418,6 +429,8 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     float matchPt2  = -1.;
     float matchEta1 = -1.;
     float matchEta2 = -1.;
+    float matchPhi1 = -1.;
+    float matchPhi2 = -1.;
     int fired_DoubleMu4_JpsiTrk_Displaced_1     = -1;
     int fired_DoubleMu4_JpsiTrk_Displaced_2     = -1;
     int fired_DoubleMu4_PsiPrimeTrk_Displaced_1 = -1;
@@ -440,6 +453,7 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
 	matchD0sign1 = trk_ptr->userFloat("d0sig");
 	matchPt1  = trk_ptr->pt();
 	matchEta1 = trk_ptr->eta();
+	matchPhi1 = trk_ptr->phi();
 	fired_DoubleMu4_JpsiTrk_Displaced_1     = trk_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced");
 	fired_DoubleMu4_PsiPrimeTrk_Displaced_1 = trk_ptr->userInt("HLT_DoubleMu4_PsiPrimeTrk_Displaced");
 	fired_DoubleMu4_JpsiTrkTrk_Displaced_1  = trk_ptr->userInt("HLT_DoubleMu4_JpsiTrkTrk_Displaced");
@@ -449,6 +463,7 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
 	matchD0sign2 = trk_ptr->userFloat("d0sig");
 	matchPt2  = trk_ptr->pt();
 	matchEta2 = trk_ptr->eta();
+	matchPhi2 = trk_ptr->phi();
 	fired_DoubleMu4_JpsiTrk_Displaced_2     = trk_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced");
 	fired_DoubleMu4_PsiPrimeTrk_Displaced_2 = trk_ptr->userInt("HLT_DoubleMu4_PsiPrimeTrk_Displaced");
 	fired_DoubleMu4_JpsiTrkTrk_Displaced_2  = trk_ptr->userInt("HLT_DoubleMu4_JpsiTrkTrk_Displaced");
@@ -457,9 +472,11 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     cand.addUserFloat("K0s_matchTrack1_D0sign", matchD0sign1);
     cand.addUserFloat("K0s_matchTrack2_D0sign", matchD0sign2);
     cand.addUserFloat("K0s_matchTrack1_pt",     matchPt1);
-    cand.addUserFloat("K0s_matchTrack2_pt",     matchPt2);
+    cand.addUserFloat("K0s_matchTrack2_pt",     matchPt2);  
     cand.addUserFloat("K0s_matchTrack1_eta",    matchEta1);
     cand.addUserFloat("K0s_matchTrack2_eta",    matchEta2);
+    cand.addUserFloat("K0s_matchTrack1_phi",    matchPhi1);
+    cand.addUserFloat("K0s_matchTrack2_phi",    matchPhi2);
     cand.addUserInt("K0s_matchTrack1_fired_DoubleMu4_JpsiTrk_Displaced", fired_DoubleMu4_JpsiTrk_Displaced_1);
     cand.addUserInt("K0s_matchTrack1_fired_DoubleMu4_PsiPrimeTrk_Displaced", fired_DoubleMu4_PsiPrimeTrk_Displaced_1);
     cand.addUserInt("K0s_matchTrack1_fired_DoubleMu4_JpsiTrkTrk_Displaced", fired_DoubleMu4_JpsiTrkTrk_Displaced_1);
