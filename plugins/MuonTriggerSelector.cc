@@ -276,6 +276,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     muons_out->back().addUserInt("isGlobal", isGlobal);    
     muons_out->back().addUserInt("isTracker", isTracker);    
     muons_out->back().addUserInt("looseId", isLoose);
+    muons_out->back().addUserInt("charge", muon.charge());
 
     // dr cut (same quantity as in HLTMuonDimuonL3Filter, to emulate HLT)
     float mudr = fabs( (- (muon.vx()-beamSpot.x0()) * muon.py() + (muon.vy()-beamSpot.y0()) * muon.px() ) / muon.pt() );
