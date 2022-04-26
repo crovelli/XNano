@@ -135,8 +135,12 @@ void PiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
 	pipi_cand.addUserFloat("pi2_vx",  trk2_ptr->vx()); 
 	pipi_cand.addUserFloat("pi2_vy",  trk2_ptr->vy()); 
 	pipi_cand.addUserFloat("pi2_vz",  trk2_ptr->vz()); 
-	pipi_cand.addUserFloat("pi1_d0sig", trk1_ptr->userFloat("d0sig"));
-	pipi_cand.addUserFloat("pi2_d0sig", trk2_ptr->userFloat("d0sig"));
+	pipi_cand.addUserFloat("pi1_d0sig",   trk1_ptr->userFloat("d0sig"));
+	pipi_cand.addUserFloat("pi2_d0sig",   trk2_ptr->userFloat("d0sig"));
+	pipi_cand.addUserFloat("pi1_maxd0PV", trk1_ptr->userFloat("maxd0PV"));
+	pipi_cand.addUserFloat("pi2_maxd0PV", trk2_ptr->userFloat("maxd0PV"));
+	pipi_cand.addUserFloat("pi1_mind0PV", trk1_ptr->userFloat("mind0PV"));
+	pipi_cand.addUserFloat("pi2_mind0PV", trk2_ptr->userFloat("mind0PV"));
 	pipi_cand.addUserInt("p1_fired_DoubleMu4_JpsiTrk_Displaced",     trk1_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced"));
 	pipi_cand.addUserInt("p1_fired_DoubleMu4_PsiPrimeTrk_Displaced", trk1_ptr->userInt("HLT_DoubleMu4_PsiPrimeTrk_Displaced"));
 	pipi_cand.addUserInt("p1_fired_DoubleMu4_JpsiTrkTrk_Displaced",  trk1_ptr->userInt("HLT_DoubleMu4_JpsiTrkTrk_Displaced"));
