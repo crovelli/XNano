@@ -3,19 +3,19 @@
 ## Getting started
 
 ```shell
-cmsrel CMSSW_9_4_7
-cd CMSSW_9_4_7/src
+cmsrel CMSSW_10_6_29
+cd CMSSW_10_6_29/src
 cmsenv
 git cms-init
 ```
 
 
-## Add the modification needed to use the KinematicParticleVertexFitter + tables for nanoAODs
+## Add the modification needed to use the KinematicParticleVertexFitter 
 
 ```shell
-git remote add crovelli-cmssw https://github.com/crovelli/cmssw.git -f -t forX-from-CMSSW_9_4_7
-cp ~/public/X/sparse-checkout_X-9-4-7 .git/info/sparse-checkout
-git checkout -b forX-from-CMSSW_9_4_7 crovelli-cmssw/forX-from-CMSSW_9_4_7
+git remote add crovelli-cmssw https://github.com/crovelli/cmssw.git -f -t forX-from-CMSSW_10_6_29
+cp ~/public/X/sparse-checkout_X-10-6-29 .git/info/sparse-checkout
+git checkout -b forX-from-CMSSW_10_6_29 crovelli-cmssw/forX-from-CMSSW_10_6_29
 cp ~/public/X/sparse-checkout_clean .git/info/sparse-checkout
 ```
 
@@ -24,7 +24,7 @@ cp ~/public/X/sparse-checkout_clean .git/info/sparse-checkout
 ```shell
 git clone git@github.com:crovelli/XNano.git ./PhysicsTools/XNano
 cd PhysicsTools/XNano
-git checkout CMSSW_9_4_7_slim
+git checkout CMSSW_10_6_29_slim
 cd ../../
 scram b
 ```
