@@ -260,6 +260,9 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     
     if( muon.pt()<ptMin_ ) continue;
     if( fabs(muon.eta())>absEtaMax_ ) continue;
+
+    if( !((muon.bestTrack())->quality(reco::TrackBase::highPurity)) ) continue;
+
     // if( !((muon.track())->highPurity()) ) continue;      // chiara: to-be-done
     // if (!muon.passed(13)) continue;   // 13 = "SoftCutBasedId"; from DataFormats/MuonReco/interface/Muon.h. Boh, does not work, to be fixed
 
