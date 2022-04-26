@@ -38,7 +38,13 @@ options.setDefault('maxEvents', 10)
 options.setDefault('tag', '10215')
 options.parseArguments()
 
-globaltag = '102X_dataRun2_v11' if not options.isMC else '94X_mcRun2_asymptotic_v3'
+globaltag = '106X_dataRun2_v35' if not options.isMC else '106X_mc2017_realistic_v9'
+# https://twiki.cern.ch/twiki/bin/view/CMS/PdmVRun2LegacyAnalysis
+# MC 2016APV: 106X_mcRun2_asymptotic_preVFP_v11
+# MC 2016: 106X_mcRun2_asymptotic_v17
+# MC 2017: 106X_mc2017_realistic_v9
+# MC 2018: 106X_upgrade2018_realistic_v16_L1v1 
+
 if options._beenSet['globalTag']:
     globaltag = options.globalTag
 
@@ -47,7 +53,7 @@ outputFileNANO = cms.untracked.string('_'.join(['xNANO', extension[options.isMC]
 outputFileFEVT = cms.untracked.string('_'.join(['xFullEvt', extension[options.isMC], options.tag])+'.root')
 if not options.inputFiles:
     options.inputFiles = ['/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/6B5A24B1-0E6E-504B-8331-BD899EB60110.root'] if not options.isMC else \
-                         ['/store/mc/RunIISummer16MiniAODv3/BdToX3872Ks_X3872ToJpsiRho_BMuonFilter_DGamma0_TuneCUEP8M1_13TeV-pythia8-evtgen/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3-v2/70000/34259CC8-8346-E911-ACC1-801844DEF380.root']
+                         ['/store/user/soffi/BPH_BToXKs_XToJPsiRho_JPsiToMuMu/RunIISummer20UL17_MiniAOD/220424_143706/0000/MiniAOD_1.root']
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
 #from Configuration.StandardSequences.Eras import eras
