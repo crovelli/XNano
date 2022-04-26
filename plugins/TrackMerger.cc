@@ -273,7 +273,21 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
 
     TSCBLBuilderNoMaterial blsBuilder;
     TrajectoryStateClosestToBeamLine tscb( blsBuilder(InitialFTS, *beamSpotHandle));
-    float d0sig = tscb.transverseImpactParameter().significance();
+    float d0sig=-1000.;
+    if (tscb.isValid()) d0sig = tscb.transverseImpactParameter().significance();
+
+    // To be stored for offline selection: min transverse impact parameter wrt all PVs in the event
+    float maxD0PV=-10000.;
+    float minD0PV= 10000.;
+    for (size_t vtx_idx = 0; vtx_idx < vertexHandle->size(); ++vtx_idx) {
+      edm::Ptr<reco::Vertex> thisPV(vertexHandle, vtx_idx);
+      TrajectoryStateClosestToPoint tscPV;
+      tscPV = trackTT.trajectoryStateClosestToPoint(GlobalPoint(thisPV->x(),thisPV->y(),thisPV->z()));
+      float d0PV=-1000.;
+      if (tscPV.isValid()) d0PV = fabs(tscPV.perigeeParameters().transverseImpactParameter());
+      if (d0PV>maxD0PV) maxD0PV=d0PV;
+      if (d0PV<minD0PV) minD0PV=d0PV;
+    }
 
     pat::CompositeCandidate pcand;
     pcand.setP4(trk.p4());
@@ -289,6 +303,8 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     pcand.addUserInt("isMatchedToSoftMuon",  matchedToSoftMuon);
     pcand.addUserInt("nValidHits", trk.bestTrack()->found());
     pcand.addUserFloat("d0sig", d0sig);    
+    pcand.addUserFloat("maxd0PV", maxD0PV);
+    pcand.addUserFloat("mind0PV", minD0PV);
     // trigger match
     for(unsigned int i=0; i<HLTPaths_.size(); i++){
       pcand.addUserInt(HLTPaths_[i],fires[iTrk][i]);
