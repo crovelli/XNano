@@ -24,6 +24,7 @@
 #include "RecoVertex/KinematicFit/interface/TwoTrackMassKinematicConstraint.h"
 #include "RecoVertex/KinematicFit/interface/KinematicConstrainedVertexFitter.h"
 
+
 #include <vector>
 #include <string>
 #include "TLorentzVector.h"
@@ -104,6 +105,8 @@ void K0sBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &
 
     // K0s candidate
     pat::CompositeCandidate k0s_tempcand;
+    float prefit_mass = vee->mass();
+    
 
     // Vertex fit without mass constraint
     KinVtxFitter fitterNMC(
@@ -153,7 +156,6 @@ void K0sBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &
       if ((p4mu1 + p4mu2 + p4tr1 + p4tr2 + p4k0s).M() - (p4mu1 + p4mu2).M() + JPSI_MASS > 5.9) continue;
       if ((p4mu1 + p4mu2 + p4tr1 + p4tr2 + p4k0s).M() - (p4mu1 + p4mu2).M() + JPSI_MASS < 4.9) continue;
 
-
       // For selected K0s, create a candidate to be saved in the event
       pat::CompositeCandidate k0s_cand;
       k0s_cand.setP4(vee->polarP4());
@@ -164,7 +166,8 @@ void K0sBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &
 	k0s_cand.addUserCand("trk1", vee->daughterPtr(1)); 
 	k0s_cand.addUserCand("trk2", vee->daughterPtr(0));
       }
-      
+
+     
       // Infos after first fit:
       k0s_cand.addUserFloat("fitted_nmc_mass", fitterNMC.fitted_candidate().mass() );   
       math::PtEtaPhiMLorentzVector pi1TLV = fitterNMC.daughter_p4(0);                   
@@ -178,6 +181,7 @@ void K0sBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &
       
       // Infos after final fit
       k0s_cand.addUserFloat("sv_prob", fitter.prob());    
+      k0s_cand.addUserFloat("prefit_mass", prefit_mass);  
       k0s_cand.addUserFloat("fitted_mass_womc", fitted_mass_womc);
       k0s_cand.addUserFloat("fitted_mass", fitter.fitted_candidate().mass() );
       k0s_cand.addUserFloat("fitted_pt",  p4k0s.Pt());
