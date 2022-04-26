@@ -44,7 +44,6 @@ public:
     // selections
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
     post_vtx_selection2_{cfg.getParameter<std::string>("postVtxSelection2")},
-    drMatchTrack_{cfg.getParameter<double>("drMatchTrack")},  
 
     // inputs
     pfcands_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("pfcands") )},
@@ -60,8 +59,7 @@ public:
     
     // wrt PV / BS
     beamspot_{consumes<reco::BeamSpot>( cfg.getParameter<edm::InputTag>("beamSpot") )},
-    vertex_src_{consumes<reco::VertexCollection>( cfg.getParameter<edm::InputTag>("offlinePrimaryVertexSrc") )}
-  
+    vertex_src_{consumes<reco::VertexCollection>( cfg.getParameter<edm::InputTag>("offlinePrimaryVertexSrc") )}  
   {
     //output
     produces<pat::CompositeCandidateCollection>();
@@ -78,7 +76,6 @@ private:
   // selections
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; 
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection2_; 
-  const double drMatchTrack_;
 
   const edm::EDGetTokenT<pat::CompositeCandidateCollection> pfcands_; 
 
@@ -331,6 +328,23 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     // post fit selection
     if( !post_vtx_selection2_(cand) ) continue;        
 
+    // impact parameters wrt this vertex: muons
+    GlobalPoint chosenPVpoint(chosenPV->position().x(), chosenPV->position().y(), chosenPV->position().z());
+    
+    TrajectoryStateClosestToPoint trajm1 = (muons_ttracks->at(l1_idx)).trajectoryStateClosestToPoint(chosenPVpoint);
+    TrajectoryStateClosestToPoint trajm2 = (muons_ttracks->at(l2_idx)).trajectoryStateClosestToPoint(chosenPVpoint);
+    float dzSignMu1  = trajm1.perigeeParameters().longitudinalImpactParameter()/trajm1.perigeeError().longitudinalImpactParameterError();
+    float dzSignMu2  = trajm2.perigeeParameters().longitudinalImpactParameter()/trajm2.perigeeError().longitudinalImpactParameterError();
+    float dxySignMu1 = trajm1.perigeeParameters().transverseImpactParameter()/trajm1.perigeeError().transverseImpactParameterError();
+    float dxySignMu2 = trajm2.perigeeParameters().transverseImpactParameter()/trajm2.perigeeError().transverseImpactParameterError();
+    
+    // impact parameters wrt this vertex: pions
+    TrajectoryStateClosestToPoint trajt1 = (pions_ttracks->at(trk1_idx)).trajectoryStateClosestToPoint(chosenPVpoint);
+    TrajectoryStateClosestToPoint trajt2 = (pions_ttracks->at(trk2_idx)).trajectoryStateClosestToPoint(chosenPVpoint);
+    float dzSignTr1  = trajt1.perigeeParameters().longitudinalImpactParameter()/trajt1.perigeeError().longitudinalImpactParameterError();
+    float dzSignTr2  = trajt2.perigeeParameters().longitudinalImpactParameter()/trajt2.perigeeError().longitudinalImpactParameterError();
+    float dxySignTr1 = trajt1.perigeeParameters().transverseImpactParameter()/trajt1.perigeeError().transverseImpactParameterError();
+    float dxySignTr2 = trajt2.perigeeParameters().transverseImpactParameter()/trajt2.perigeeError().transverseImpactParameterError();
 	
     // Save all wanted infos: B0-related
     cand.addUserFloat("decayVtxX", fitted_vtx->position().x());
@@ -363,7 +377,10 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     cand.addUserFloat("MuMu_DCA", ll_ptr->userFloat("DCA")); 
     cand.addUserFloat("MuMu_LxySign", ll_ptr->userFloat("LxySign"));
     cand.addUserFloat("MuMu_cosAlpha", ll_ptr->userFloat("cosAlpha"));
-
+    cand.addUserFloat("MuMu_mu1_dzsign",  dzSignMu1);
+    cand.addUserFloat("MuMu_mu2_dzsign",  dzSignMu2);
+    cand.addUserFloat("MuMu_mu1_dxysign", dxySignMu1);
+    cand.addUserFloat("MuMu_mu2_dxysign", dxySignMu2);
     cand.addUserInt("MuMu_mu1_fired_Dimuon25_Jpsi",                   ll_ptr->userInt("mu1_fired_Dimuon25_Jpsi"));
     cand.addUserInt("MuMu_mu1_fired_Dimuon18_PsiPrime",               ll_ptr->userInt("mu1_fired_Dimuon18_PsiPrime"));
     cand.addUserInt("MuMu_mu1_fired_DoubleMu4_JpsiTrk_Displaced",     ll_ptr->userInt("mu1_fired_DoubleMu4_JpsiTrk_Displaced"));
@@ -383,6 +400,8 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     cand.addUserFloat("PiPi_prefit_pi1_vy",  pipi_ptr->userFloat("pi1_vy"));
     cand.addUserFloat("PiPi_prefit_pi1_vz",  pipi_ptr->userFloat("pi1_vz"));
     cand.addUserFloat("PiPi_pi1_d0sig",      pipi_ptr->userFloat("pi1_d0sig"));
+    cand.addUserFloat("PiPi_pi1_maxd0PV",    pipi_ptr->userFloat("pi1_maxd0PV")); 
+    cand.addUserFloat("PiPi_pi1_mind0PV",    pipi_ptr->userFloat("pi1_mind0PV")); 
     cand.addUserFloat("PiPi_prefit_pi2_pt",  pipi_ptr->userFloat("pi2_pt"));
     cand.addUserFloat("PiPi_prefit_pi2_eta", pipi_ptr->userFloat("pi2_eta"));
     cand.addUserFloat("PiPi_prefit_pi2_phi", pipi_ptr->userFloat("pi2_phi"));
@@ -390,7 +409,12 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     cand.addUserFloat("PiPi_prefit_pi2_vy",  pipi_ptr->userFloat("pi2_vy"));
     cand.addUserFloat("PiPi_prefit_pi2_vz",  pipi_ptr->userFloat("pi2_vz"));
     cand.addUserFloat("PiPi_pi2_d0sig",      pipi_ptr->userFloat("pi2_d0sig"));
-    
+    cand.addUserFloat("PiPi_pi2_maxd0PV",    pipi_ptr->userFloat("pi2_maxd0PV")); 
+    cand.addUserFloat("PiPi_pi2_mind0PV",    pipi_ptr->userFloat("pi2_mind0PV")); 
+    cand.addUserFloat("PiPi_pi1_dzsign",  dzSignTr1);
+    cand.addUserFloat("PiPi_pi2_dzsign",  dzSignTr2);
+    cand.addUserFloat("PiPi_pi1_dxysign", dxySignTr1);
+    cand.addUserFloat("PiPi_pi2_dxysign", dxySignTr2);
     cand.addUserInt("PiPi_p1_fired_DoubleMu4_JpsiTrk_Displaced",     pipi_ptr->userInt("p1_fired_DoubleMu4_JpsiTrk_Displaced"));
     cand.addUserInt("PiPi_p1_fired_DoubleMu4_PsiPrimeTrk_Displaced", pipi_ptr->userInt("p1_fired_DoubleMu4_PsiPrimeTrk_Displaced"));
     cand.addUserInt("PiPi_p1_fired_DoubleMu4_JpsiTrkTrk_Displaced",  pipi_ptr->userInt("p1_fired_DoubleMu4_JpsiTrkTrk_Displaced"));
@@ -399,7 +423,8 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     cand.addUserInt("PiPi_p2_fired_DoubleMu4_JpsiTrkTrk_Displaced",  pipi_ptr->userInt("p2_fired_DoubleMu4_JpsiTrkTrk_Displaced"));
 
     // Save all wanted infos: K0s-related
-    cand.addUserFloat("K0s_nmcFitted_mass", k0short_ptr->userFloat("fitted_nmc_mass"));
+    cand.addUserFloat("K0s_prefit_mass",      k0short_ptr->userFloat("prefit_mass"));
+    cand.addUserFloat("K0s_nmcFitted_mass",   k0short_ptr->userFloat("fitted_nmc_mass"));
     cand.addUserFloat("K0s_nmcFitted_pi1pt",  k0short_ptr->userFloat("fitted_nmc_pi1pt"));
     cand.addUserFloat("K0s_nmcFitted_pi1eta", k0short_ptr->userFloat("fitted_nmc_pi1eta"));
     cand.addUserFloat("K0s_nmcFitted_pi1phi", k0short_ptr->userFloat("fitted_nmc_pi1phi"));
@@ -423,8 +448,12 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     // matching pi1 and pi2 from the selected k0s
     float minDr1 = 1000.;
     float minDr2 = 1000.;
-    float matchD0sign1 = -1.;
-    float matchD0sign2 = -1.;
+    float matchD0sign1  = -1.;
+    float matchD0sign2  = -1.;
+    float matchMaxD0Pv1 = -1.;
+    float matchMaxD0Pv2 = -1.;
+    float matchMinD0Pv1 = -1.;
+    float matchMinD0Pv2 = -1.;
     float matchPt1  = -1.;
     float matchPt2  = -1.;
     float matchEta1 = -1.;
@@ -448,9 +477,11 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
       thetrk.SetPtEtaPhiM(trk_ptr->pt(), trk_ptr->eta(), trk_ptr->phi(), PI_MASS);
       float dr1 = thetrk.DeltaR(p4_K0sP1);
       float dr2 = thetrk.DeltaR(p4_K0sP2);
-      if (dr1<minDr1 && dr1<drMatchTrack_) {
+      if (dr1<minDr1) {
 	minDr1 = dr1;
-	matchD0sign1 = trk_ptr->userFloat("d0sig");
+	matchD0sign1  = trk_ptr->userFloat("d0sig");
+	matchMaxD0Pv1 = trk_ptr->userFloat("maxd0PV");   
+	matchMinD0Pv1 = trk_ptr->userFloat("mind0PV");   
 	matchPt1  = trk_ptr->pt();
 	matchEta1 = trk_ptr->eta();
 	matchPhi1 = trk_ptr->phi();
@@ -458,9 +489,11 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
 	fired_DoubleMu4_PsiPrimeTrk_Displaced_1 = trk_ptr->userInt("HLT_DoubleMu4_PsiPrimeTrk_Displaced");
 	fired_DoubleMu4_JpsiTrkTrk_Displaced_1  = trk_ptr->userInt("HLT_DoubleMu4_JpsiTrkTrk_Displaced");
       }
-      if (dr2<minDr2 && dr2<drMatchTrack_) {
+      if (dr2<minDr2) {
 	minDr2 = dr2;
-	matchD0sign2 = trk_ptr->userFloat("d0sig");
+	matchD0sign2  = trk_ptr->userFloat("d0sig");
+	matchMaxD0Pv2 = trk_ptr->userFloat("maxd0PV");   
+	matchMinD0Pv2 = trk_ptr->userFloat("mind0PV");   
 	matchPt2  = trk_ptr->pt();
 	matchEta2 = trk_ptr->eta();
 	matchPhi2 = trk_ptr->phi();
@@ -469,14 +502,20 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
 	fired_DoubleMu4_JpsiTrkTrk_Displaced_2  = trk_ptr->userInt("HLT_DoubleMu4_JpsiTrkTrk_Displaced");
       }
     }
-    cand.addUserFloat("K0s_matchTrack1_D0sign", matchD0sign1);
-    cand.addUserFloat("K0s_matchTrack2_D0sign", matchD0sign2);
-    cand.addUserFloat("K0s_matchTrack1_pt",     matchPt1);
-    cand.addUserFloat("K0s_matchTrack2_pt",     matchPt2);  
-    cand.addUserFloat("K0s_matchTrack1_eta",    matchEta1);
-    cand.addUserFloat("K0s_matchTrack2_eta",    matchEta2);
-    cand.addUserFloat("K0s_matchTrack1_phi",    matchPhi1);
-    cand.addUserFloat("K0s_matchTrack2_phi",    matchPhi2);
+    cand.addUserFloat("K0s_matchTrack1_D0sign",  matchD0sign1);
+    cand.addUserFloat("K0s_matchTrack2_D0sign",  matchD0sign2);
+    cand.addUserFloat("K0s_matchTrack1_maxD0Pv", matchMaxD0Pv1);
+    cand.addUserFloat("K0s_matchTrack2_maxD0Pv", matchMaxD0Pv2);
+    cand.addUserFloat("K0s_matchTrack1_minD0Pv", matchMinD0Pv1);
+    cand.addUserFloat("K0s_matchTrack2_minD0Pv", matchMinD0Pv2);
+    cand.addUserFloat("K0s_matchTrack1_dR",      minDr1);
+    cand.addUserFloat("K0s_matchTrack2_dR",      minDr2);  
+    cand.addUserFloat("K0s_matchTrack1_pt",      matchPt1);
+    cand.addUserFloat("K0s_matchTrack2_pt",      matchPt2);  
+    cand.addUserFloat("K0s_matchTrack1_eta",     matchEta1);
+    cand.addUserFloat("K0s_matchTrack2_eta",     matchEta2);
+    cand.addUserFloat("K0s_matchTrack1_phi",     matchPhi1);
+    cand.addUserFloat("K0s_matchTrack2_phi",     matchPhi2);
     cand.addUserInt("K0s_matchTrack1_fired_DoubleMu4_JpsiTrk_Displaced", fired_DoubleMu4_JpsiTrk_Displaced_1);
     cand.addUserInt("K0s_matchTrack1_fired_DoubleMu4_PsiPrimeTrk_Displaced", fired_DoubleMu4_PsiPrimeTrk_Displaced_1);
     cand.addUserInt("K0s_matchTrack1_fired_DoubleMu4_JpsiTrkTrk_Displaced", fired_DoubleMu4_JpsiTrkTrk_Displaced_1);
