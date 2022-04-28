@@ -35,18 +35,14 @@ trackXTable = cms.EDProducer(
     singleton = cms.bool(False),
     extension = cms.bool(False), 
     variables = cms.PSet(
-        CandVars,
-        vx = Var("vx()", float, doc="x coordinate of vertex position, in cm", precision=10),
-        vy = Var("vy()", float, doc="y coordinate of vertex position, in cm", precision=10),
-        vz = Var("vz()", float, doc="z coordinate of vertex position, in cm", precision=10),
+        #CandVars,
+        #vx = Var("vx()", float, doc="x coordinate of vertex position, in cm", precision=10),
+        #vy = Var("vy()", float, doc="y coordinate of vertex position, in cm", precision=10),
+        #vz = Var("vz()", float, doc="z coordinate of vertex position, in cm", precision=10),
         isMatchedToMuon = Var("userInt('isMatchedToMuon')",bool,doc="track was used to build a muon", precision=10),
         isMatchedToLooseMuon = Var("userInt('isMatchedToLooseMuon')",bool,doc="track was used to build a muon passing LooseID", precision=10),
         isMatchedToSoftMuon = Var("userInt('isMatchedToSoftMuon')",bool,doc="track was used to build a muon passing softID", precision=10),
         nValidHits = Var("userInt('nValidHits')", int,doc="Number of valid hits on track", precision=10),
-        d0sig = Var("userFloat('d0sig')", float, doc="d0 significance", precision=10),
-        fired_HLT_DoubleMu4_JpsiTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrk_Displaced')",int,doc="reco track fired this trigger"),
-        fired_HLT_DoubleMu4_PsiPrimeTrk_Displaced = Var("userInt('HLT_DoubleMu4_PsiPrimeTrk_Displaced')",int,doc="reco track fired this trigger"),
-        fired_HLT_DoubleMu4_JpsiTrkTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrkTrk_Displaced')",int,doc="reco track fired this trigger"),
     ),
 )
 
