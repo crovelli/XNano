@@ -24,6 +24,13 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                              )
 
 
+# we need at least 2 triggering muons
+countTrgMuons = cms.EDFilter("PATCandViewCountFilter",
+    minNumber = cms.uint32(2),
+    maxNumber = cms.uint32(999999),
+    src = cms.InputTag("muonTrgSelector", "trgMuons")
+)
+
 # muons selection
 muonXTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     src = cms.InputTag("muonTrgSelector:SelectedMuons"),
@@ -32,16 +39,11 @@ muonXTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     doc  = cms.string("slimmedMuons for X analysis after basic selection"),
     singleton = cms.bool(False),         
     extension = cms.bool(False),         
-        variables = cms.PSet(CandVars,
-        ptErr   = Var("bestTrack().ptError()", float, doc = "ptError of the muon track", precision=6),
-        vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
-        vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
-        vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6),
-        pfRelIso03_all = Var("(pfIsolationR03().sumChargedHadronPt + max(pfIsolationR03().sumNeutralHadronEt + pfIsolationR03().sumPhotonEt - pfIsolationR03().sumPUPt/2,0.0))/pt",float,doc="PF relative isolation dR=0.3, total (deltaBeta corrections)"),
-        pfRelIso04_all = Var("(pfIsolationR04().sumChargedHadronPt + max(pfIsolationR04().sumNeutralHadronEt + pfIsolationR04().sumPhotonEt - pfIsolationR04().sumPUPt/2,0.0))/pt",float,doc="PF relative isolation dR=0.4, total (deltaBeta corrections)"),
+        variables = cms.PSet( 
         isGlobal = Var("userInt('isGlobal')",bool,doc="muon is global muon"),
         softId = Var("passed('SoftCutBasedId')",bool,doc="soft cut-based ID"), 
         looseId = Var("userInt('looseId')",bool,doc="loose cut-based ID"),
+        charge = Var("userInt('charge')",bool,doc="charge"),
     ),
 )
 
@@ -73,6 +75,6 @@ selectedMuonsMCMatchEmbedded = cms.EDProducer(
 )
 
 
-muonXSequence = cms.Sequence(muonTrgSelector)
+muonXSequence = cms.Sequence(muonTrgSelector * countTrgMuons)
 muonXMC = cms.Sequence(muonXSequence + muonsXMCMatchForTable + selectedMuonsMCMatchEmbedded + muonXMCTable)
 muonXTables = cms.Sequence(muonXTable)
