@@ -79,6 +79,8 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   // produce the SelectedMuons collection (all muons passing the preselection)
   produces<pat::MuonCollection>("SelectedMuons");
   produces<TransientTrackCollection>("SelectedTransientMuons");  
+  // produce the triggering muons collection
+  produces<pat::MuonCollection>("trgMuons");
 }
 
 void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -102,7 +104,9 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   // Outputs
   std::unique_ptr<pat::MuonCollection>      muons_out      ( new pat::MuonCollection );
   std::unique_ptr<TransientTrackCollection> trans_muons_out( new TransientTrackCollection );
+  std::unique_ptr<pat::MuonCollection>      trgmuons_out   ( new pat::MuonCollection );
   
+  std::vector<int> muonIsTrigger(muons->size(), 0);
   std::vector<std::vector<int>> fires;
   std::vector<std::vector<float>> matcher; 
   std::vector<std::vector<float>> DR;
@@ -248,11 +252,21 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 	  }
 	}              
       }
+      if(matcher[iMuo][path]!=1000.) muonIsTrigger[iMuo]=1;
     }
   }
+  // 
 
   if(debug) std::cout << "number of Muons=" <<muons->size() << endl;
 
+  // Create a collection with all trg muons
+  for(const pat::Muon & muon : *muons){
+    unsigned int iMuo(&muon -&(muons->at(0)));
+    if(muonIsTrigger[iMuo]==1){
+      pat::Muon recoTriggerMuonCand(muon);
+      trgmuons_out->emplace_back(recoTriggerMuonCand);
+    }
+  }
 
   // Save all reco muons passing the selection
   for(const pat::Muon & muon : *muons){
@@ -260,9 +274,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     
     if( muon.pt()<ptMin_ ) continue;
     if( fabs(muon.eta())>absEtaMax_ ) continue;
-
-    if( !((muon.bestTrack())->quality(reco::TrackBase::highPurity)) ) continue;
-
     // if( !((muon.track())->highPurity()) ) continue;      // chiara: to-be-done
     // if (!muon.passed(13)) continue;   // 13 = "SoftCutBasedId"; from DataFormats/MuonReco/interface/Muon.h. Boh, does not work, to be fixed
 
@@ -293,6 +304,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
   iEvent.put(std::move(muons_out),       "SelectedMuons");
   iEvent.put(std::move(trans_muons_out), "SelectedTransientMuons");
+  iEvent.put(std::move(trgmuons_out),    "trgMuons");
 }
 
 
