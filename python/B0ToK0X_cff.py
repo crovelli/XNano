@@ -33,6 +33,7 @@ K0sToPiPi = cms.EDProducer(
 # pi+pi- candidate 
 candPiPi = cms.EDProducer(
     'PiPiBuilder',
+    transientTracksSrc = cms.InputTag('tracksX', 'SelectedTransientTracks'),
     dimuons = cms.InputTag('muonPairsForJPsiMuMu', 'SelectedDiMuons'),
     pfcands= cms.InputTag('tracksX', 'SelectedTracks'),
     trkSelection = cms.string('pt > 0.4 && abs(eta)<3.0'),
@@ -168,9 +169,13 @@ BToK0sMuMuPiPiTable = cms.EDProducer(
         decayVtxZE = ufloat('decayVtxZE'),
         # Cos(theta) 
         lxySign_PV = ufloat('lxySign_PV'),
-        cosAlpha_PV = ufloat('cosAlpha_PV'),
+        lxySign_BS = ufloat('lxySign_BS'),
+        cosAlpha3D_PV = ufloat('cosAlpha3D_PV'),
+        cosAlpha2D_PV = ufloat('cosAlpha2D_PV'),
+        cosAlpha2D_BS = ufloat('cosAlpha2D_BS'),
         # vtx
-        pv_idx = uint('pv_idx'),
+        pv3D_idx = uint('pv3D_idx'),
+        pv2D_idx = uint('pv2D_idx'),
         PVx  = ufloat('PVx'),
         PVy  = ufloat('PVy'),
         PVz  = ufloat('PVz'),
@@ -204,16 +209,16 @@ BToK0sMuMuPiPiTable = cms.EDProducer(
         MuMu_mu2_dzsign  = ufloat('MuMu_mu2_dzsign'),
         MuMu_mu1_dxysign = ufloat('MuMu_mu1_dxysign'),
         MuMu_mu2_dxysign = ufloat('MuMu_mu2_dxysign'),
-        MuMu_mu1_fired_Dimuon25_Jpsi                   = uint('MuMu_mu1_fired_Dimuon25_Jpsi'),
-        MuMu_mu1_fired_Dimuon18_PsiPrime               = uint('MuMu_mu1_fired_Dimuon18_PsiPrime'),
-        MuMu_mu1_fired_DoubleMu4_JpsiTrk_Displaced     = uint('MuMu_mu1_fired_DoubleMu4_JpsiTrk_Displaced'),
-        MuMu_mu1_fired_DoubleMu4_PsiPrimeTrk_Displaced = uint('MuMu_mu1_fired_DoubleMu4_PsiPrimeTrk_Displaced'),
-        MuMu_mu1_fired_DoubleMu4_JpsiTrkTrk_Displaced  = uint('MuMu_mu1_fired_DoubleMu4_JpsiTrkTrk_Displaced'),
-        MuMu_mu2_fired_Dimuon25_Jpsi                   = uint('MuMu_mu2_fired_Dimuon25_Jpsi'),
-        MuMu_mu2_fired_Dimuon18_PsiPrime               = uint('MuMu_mu2_fired_Dimuon18_PsiPrime'),
-        MuMu_mu2_fired_DoubleMu4_JpsiTrk_Displaced     = uint('MuMu_mu2_fired_DoubleMu4_JpsiTrk_Displaced'),
-        MuMu_mu2_fired_DoubleMu4_PsiPrimeTrk_Displaced = uint('MuMu_mu2_fired_DoubleMu4_PsiPrimeTrk_Displaced'),
-        MuMu_mu2_fired_DoubleMu4_JpsiTrkTrk_Displaced  = uint('MuMu_mu2_fired_DoubleMu4_JpsiTrkTrk_Displaced'),
+        MuMu_mu1_trackQuality = uint('MuMu_mu1_trackQuality'),
+        MuMu_mu2_trackQuality = uint('MuMu_mu2_trackQuality'),
+        MuMu_mu1_fired_Dimuon25_Jpsi                = uint('MuMu_mu1_fired_Dimuon25_Jpsi'),
+        MuMu_mu1_fired_DoubleMu4_JpsiTrk_Displaced  = uint('MuMu_mu1_fired_DoubleMu4_JpsiTrk_Displaced'),
+        MuMu_mu2_fired_Dimuon25_Jpsi                = uint('MuMu_mu2_fired_Dimuon25_Jpsi'),
+        MuMu_mu2_fired_DoubleMu4_JpsiTrk_Displaced  = uint('MuMu_mu2_fired_DoubleMu4_JpsiTrk_Displaced'),
+        MuMu_mu1_dr_Dimuon25_Jpsi                   = ufloat('MuMu_mu1_dr_Dimuon25_Jpsi'),
+        MuMu_mu1_dr_DoubleMu4_JpsiTrk_Displaced     = ufloat('MuMu_mu1_dr_DoubleMu4_JpsiTrk_Displaced'),
+        MuMu_mu2_dr_Dimuon25_Jpsi                   = ufloat('MuMu_mu2_dr_Dimuon25_Jpsi'),
+        MuMu_mu2_dr_DoubleMu4_JpsiTrk_Displaced     = ufloat('MuMu_mu2_dr_DoubleMu4_JpsiTrk_Displaced'),
 
         # pipi   
         PiPi_prefit_pi1_pt  = ufloat('PiPi_prefit_pi1_pt'),
@@ -238,12 +243,11 @@ BToK0sMuMuPiPiTable = cms.EDProducer(
         PiPi_pi2_dzsign     = ufloat('PiPi_pi2_dzsign'),
         PiPi_pi1_dxysign    = ufloat('PiPi_pi1_dxysign'),
         PiPi_pi2_dxysign    = ufloat('PiPi_pi2_dxysign'),
-        PiPi_p1_fired_DoubleMu4_JpsiTrk_Displaced     = uint('PiPi_p1_fired_DoubleMu4_JpsiTrk_Displaced'),
-        PiPi_p1_fired_DoubleMu4_PsiPrimeTrk_Displaced = uint('PiPi_p1_fired_DoubleMu4_PsiPrimeTrk_Displaced'),
-        PiPi_p1_fired_DoubleMu4_JpsiTrkTrk_Displaced  = uint('PiPi_p1_fired_DoubleMu4_JpsiTrkTrk_Displaced'),
-        PiPi_p2_fired_DoubleMu4_JpsiTrk_Displaced     = uint('PiPi_p2_fired_DoubleMu4_JpsiTrk_Displaced'),
-        PiPi_p2_fired_DoubleMu4_PsiPrimeTrk_Displaced = uint('PiPi_p2_fired_DoubleMu4_PsiPrimeTrk_Displaced'),
-        PiPi_p2_fired_DoubleMu4_JpsiTrkTrk_Displaced  = uint('PiPi_p2_fired_DoubleMu4_JpsiTrkTrk_Displaced'),
+        PiPi_p1_fired_DoubleMu4_JpsiTrk_Displaced = uint('PiPi_p1_fired_DoubleMu4_JpsiTrk_Displaced'),
+        PiPi_p2_fired_DoubleMu4_JpsiTrk_Displaced = uint('PiPi_p2_fired_DoubleMu4_JpsiTrk_Displaced'),
+        PiPi_p1_dr_DoubleMu4_JpsiTrk_Displaced    = ufloat('PiPi_p1_dr_DoubleMu4_JpsiTrk_Displaced'),
+        PiPi_p2_dr_DoubleMu4_JpsiTrk_Displaced    = ufloat('PiPi_p2_dr_DoubleMu4_JpsiTrk_Displaced'),
+        PiPi_sv_prob = ufloat('PiPi_sv_prob'),
 
         # K0s
         K0s_prefit_mass = ufloat('K0s_prefit_mass'),
@@ -265,6 +269,9 @@ BToK0sMuMuPiPiTable = cms.EDProducer(
         K0s_mcFitted_vtxXE = ufloat('K0s_mcFitted_vtxXE'),
         K0s_mcFitted_vtxYE = ufloat('K0s_mcFitted_vtxYE'),
         K0s_mcFitted_vtxZE = ufloat('K0s_mcFitted_vtxZE'),
+        K0_lxySign_wrtBvtx = ufloat('K0_lxySign_wrtBvtx'),
+        K0_cosAlpha3D = ufloat('K0_cosAlpha3D'),
+        K0_cosAlpha2D = ufloat('K0_cosAlpha2D'),
         K0s_matchTrack1_D0sign = ufloat('K0s_matchTrack1_D0sign'),
         K0s_matchTrack2_D0sign = ufloat('K0s_matchTrack2_D0sign'),
         K0s_matchTrack1_maxD0Pv = ufloat('K0s_matchTrack1_maxD0Pv'),
@@ -280,11 +287,7 @@ BToK0sMuMuPiPiTable = cms.EDProducer(
         K0s_matchTrack1_phi = ufloat('K0s_matchTrack1_phi'),
         K0s_matchTrack2_phi = ufloat('K0s_matchTrack2_phi'),
         K0s_matchTrack1_fired_DoubleMu4_JpsiTrk_Displaced = uint('K0s_matchTrack1_fired_DoubleMu4_JpsiTrk_Displaced'),
-        K0s_matchTrack1_fired_DoubleMu4_PsiPrimeTrk_Displaced = uint('K0s_matchTrack1_fired_DoubleMu4_PsiPrimeTrk_Displaced'),
-        K0s_matchTrack1_fired_DoubleMu4_JpsiTrkTrk_Displaced = uint('K0s_matchTrack1_fired_DoubleMu4_JpsiTrkTrk_Displaced'),
         K0s_matchTrack2_fired_DoubleMu4_JpsiTrk_Displaced = uint('K0s_matchTrack2_fired_DoubleMu4_JpsiTrk_Displaced'),
-        K0s_matchTrack2_fired_DoubleMu4_PsiPrimeTrk_Displaced = uint('K0s_matchTrack2_fired_DoubleMu4_PsiPrimeTrk_Displaced'),
-        K0s_matchTrack2_fired_DoubleMu4_JpsiTrkTrk_Displaced = uint('K0s_matchTrack2_fired_DoubleMu4_JpsiTrkTrk_Displaced')
     )
 )
 
