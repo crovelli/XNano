@@ -308,6 +308,8 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     // trigger match
     for(unsigned int i=0; i<HLTPaths_.size(); i++){
       pcand.addUserInt(HLTPaths_[i],fires[iTrk][i]);
+      std::string namedr = HLTPaths_[i]+"_dr";
+      pcand.addUserFloat(namedr,DR[iTrk][i]);  
     }
 
     // in order to avoid revoking the sxpensive ttrack builder many times and still have everything sorted, we add them to vector of pairs
