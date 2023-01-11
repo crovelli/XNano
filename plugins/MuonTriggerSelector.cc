@@ -3,9 +3,6 @@
 // one matched to the selected triggers
 // another fitered wrt the selected triggers
 
-// chiara: 
-// for the moment track purity is not required. To be activated when switching to 10.6.x
-
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -274,8 +271,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     
     if( muon.pt()<ptMin_ ) continue;
     if( fabs(muon.eta())>absEtaMax_ ) continue;
-    // if( !((muon.track())->highPurity()) ) continue;      // chiara: to-be-done
-    // if (!muon.passed(13)) continue;   // 13 = "SoftCutBasedId"; from DataFormats/MuonReco/interface/Muon.h. Boh, does not work, to be fixed
 
     const reco::TransientTrack muonTT((*(muon.bestTrack())),&(*bFieldHandle));  
     if(!muonTT.isValid()) continue; 
@@ -291,13 +286,19 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     muons_out->back().addUserInt("isTracker", isTracker);    
     muons_out->back().addUserInt("looseId", isLoose);
     muons_out->back().addUserInt("charge", muon.charge());
+    if( muon.innerTrack().isNull() ) 
+      muons_out->back().addUserInt("trackQuality", 999);
+    else
+      muons_out->back().addUserInt("trackQuality", (muon.innerTrack()->quality(reco::TrackBase::highPurity)));
 
     // dr cut (same quantity as in HLTMuonDimuonL3Filter, to emulate HLT)
     float mudr = fabs( (- (muon.vx()-beamSpot.x0()) * muon.py() + (muon.vy()-beamSpot.y0()) * muon.px() ) / muon.pt() );
     muons_out->back().addUserFloat("dr", mudr);  
 
     for(unsigned int i=0; i<HLTPaths_.size(); i++){
-      muons_out->back().addUserInt(HLTPaths_[i],fires[iMuo][i]);
+      muons_out->back().addUserInt(HLTPaths_[i],fires[iMuo][i]);  // fired HLT or not
+      std::string namedr = HLTPaths_[i]+"_dr";
+      muons_out->back().addUserFloat(namedr,DR[iMuo][i]);         // dR between HLT and offline, to be studied
     }
     trans_muons_out->emplace_back(muonTT);
   }
