@@ -7,10 +7,7 @@ trgTable = cms.EDProducer( "TrgBitTableProducer",
                           # interesting paths for 2017 and 2018
                           paths      = cms.vstring(
                                              "HLT_Dimuon25_Jpsi",                        # inclusive dimuon jpsi
-                                             "HLT_DoubleMu4_JpsiTrk_Displaced",          # displaced jpistrk or jpsi trktrk
-                                             "HLT_DoubleMu4_JpsiTrkTrk_Displaced",       # displaced jpistrk or jpsi trktrk
-                                             "HLT_Dimuon18_PsiPrime",                    # inclusive dimuon psi2s
-                                             "HLT_DoubleMu4_PsiPrimeTrk_Displaced"       # displaced psi2s trk 
+                                             "HLT_DoubleMu4_JpsiTrk_Displaced"           # displaced jpistrk 
                                               ),
 
                           # interesting paths for 2016 
