@@ -24,7 +24,6 @@
 #include "RecoVertex/KinematicFit/interface/TwoTrackMassKinematicConstraint.h"
 #include "RecoVertex/KinematicFit/interface/KinematicConstrainedVertexFitter.h"
 
-
 #include <vector>
 #include <string>
 #include "TLorentzVector.h"
@@ -193,6 +192,7 @@ void K0sBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &
       k0s_cand.addUserFloat("fitted_vtxEx", fitted_vtx->error().cxx());
       k0s_cand.addUserFloat("fitted_vtxEy", fitted_vtx->error().cyy());
       k0s_cand.addUserFloat("fitted_vtxEz", fitted_vtx->error().czz());
+      k0s_cand.addUserFloat("fitted_vtxExy", fitted_vtx->error().matrix()(0,1));
 
       // Index
       k0s_cand.addUserInt("mumu_idx", mumu_idx );
