@@ -18,6 +18,7 @@
 #include "TLorentzVector.h"
 
 #include "helper.h"
+#include "KinVtxFitter.h"
 
 class PiPiBuilder : public edm::global::EDProducer<> {
 
@@ -28,6 +29,7 @@ public:
   explicit PiPiBuilder(const edm::ParameterSet &cfg):
     trk_selection_{cfg.getParameter<std::string>("trkSelection")},
     pre_vtx_selection_{cfg.getParameter<std::string>("preVtxSelection")},
+    ttracks_src_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("transientTracksSrc") )},
     dimuons_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("dimuons") )},
     pfcands_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("pfcands") )} {
       produces<pat::CompositeCandidateCollection>("SelectedDiPions");
@@ -42,6 +44,7 @@ public:
 private:
   const StringCutObjectSelector<pat::CompositeCandidate> trk_selection_;     
   const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_;
+  const edm::EDGetTokenT<TransientTrackCollection> ttracks_src_;
   const edm::EDGetTokenT<pat::CompositeCandidateCollection> dimuons_;
   const edm::EDGetTokenT<pat::CompositeCandidateCollection> pfcands_; 
 };
@@ -49,6 +52,8 @@ private:
 void PiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &) const {
 
   // inputs  
+  edm::Handle<TransientTrackCollection> ttracks;
+  evt.getByToken(ttracks_src_, ttracks);
   edm::Handle<pat::CompositeCandidateCollection> dimuons;
   evt.getByToken(dimuons_, dimuons);  
   edm::Handle<pat::CompositeCandidateCollection> pfcands;
@@ -118,6 +123,14 @@ void PiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
 	// minimal selection 
 	if( !pre_vtx_selection_(pipi_cand) ) continue;
 
+	// Fit to common vertex: we do not cut on the outcome, but we store the probability
+	KinVtxFitter fitter(
+			  {ttracks->at(trk1_idx), ttracks->at(trk2_idx)},
+			  {trk1_ptr->mass(), trk2_ptr->mass()},
+			  {PI_SIGMA, PI_SIGMA} //some small sigma for the particle mass
+			    );
+	pipi_cand.addUserFloat("sv_prob", fitter.prob());
+
 	// Saver further quantities to be saved in the final ntuples
 	pipi_cand.addUserInt("mumu_idx", ll_idx );  
 
@@ -141,12 +154,10 @@ void PiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
 	pipi_cand.addUserFloat("pi2_maxd0PV", trk2_ptr->userFloat("maxd0PV"));
 	pipi_cand.addUserFloat("pi1_mind0PV", trk1_ptr->userFloat("mind0PV"));
 	pipi_cand.addUserFloat("pi2_mind0PV", trk2_ptr->userFloat("mind0PV"));
-	pipi_cand.addUserInt("p1_fired_DoubleMu4_JpsiTrk_Displaced",     trk1_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced"));
-	pipi_cand.addUserInt("p1_fired_DoubleMu4_PsiPrimeTrk_Displaced", trk1_ptr->userInt("HLT_DoubleMu4_PsiPrimeTrk_Displaced"));
-	pipi_cand.addUserInt("p1_fired_DoubleMu4_JpsiTrkTrk_Displaced",  trk1_ptr->userInt("HLT_DoubleMu4_JpsiTrkTrk_Displaced"));
-	pipi_cand.addUserInt("p2_fired_DoubleMu4_JpsiTrk_Displaced",     trk2_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced"));
-	pipi_cand.addUserInt("p2_fired_DoubleMu4_PsiPrimeTrk_Displaced", trk2_ptr->userInt("HLT_DoubleMu4_PsiPrimeTrk_Displaced"));
-	pipi_cand.addUserInt("p2_fired_DoubleMu4_JpsiTrkTrk_Displaced",  trk2_ptr->userInt("HLT_DoubleMu4_JpsiTrkTrk_Displaced"));
+	pipi_cand.addUserInt("p1_fired_DoubleMu4_JpsiTrk_Displaced", trk1_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced"));
+	pipi_cand.addUserInt("p2_fired_DoubleMu4_JpsiTrk_Displaced", trk2_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced"));
+	pipi_cand.addUserFloat("p1_dr_DoubleMu4_JpsiTrk_Displaced", trk1_ptr->userFloat("HLT_DoubleMu4_JpsiTrk_Displaced_dr"));
+	pipi_cand.addUserFloat("p2_dr_DoubleMu4_JpsiTrk_Displaced", trk2_ptr->userFloat("HLT_DoubleMu4_JpsiTrk_Displaced_dr"));
 
 	// Put in the event
 	pipi_out->push_back(pipi_cand);
