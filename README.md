@@ -24,7 +24,7 @@ cp ~/public/X/sparse-checkout_clean .git/info/sparse-checkout
 ```shell
 git clone git@github.com:crovelli/XNano.git ./PhysicsTools/XNano
 cd PhysicsTools/XNano
-git checkout CMSSW_10_6_29_slim
+git checkout CMSSW_10_6_29_slim_winter22
 cd ../../
 scram b
 ```
