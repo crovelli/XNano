@@ -34,7 +34,8 @@ options.register('skip', 0,
     "skip first N events"
 )
 
-options.setDefault('maxEvents', 10)
+options.setDefault('maxEvents', -1)
+#options.setDefault('maxEvents', 5000)
 options.setDefault('tag', '10215')
 options.parseArguments()
 
@@ -52,8 +53,9 @@ extension = {False : 'data', True : 'mc'}
 outputFileNANO = cms.untracked.string('_'.join(['xNANO', extension[options.isMC], options.tag])+'.root')
 outputFileFEVT = cms.untracked.string('_'.join(['xFullEvt', extension[options.isMC], options.tag])+'.root')
 if not options.inputFiles:
-    options.inputFiles = ['/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/6B5A24B1-0E6E-504B-8331-BD899EB60110.root'] if not options.isMC else \
-                         ['/store/user/soffi/BPH_BToXKs_XToJPsiRho_JPsiToMuMu/RunIISummer20UL17_MiniAOD/220424_143706/0000/MiniAOD_1.root']
+    options.inputFiles = ['/store/data/Run2017B/Charmonium/MINIAOD/UL2017_MiniAODv2-v1/260000/08905FAC-8029-1A47-A469-C2956FEED8DE.root'] if not options.isMC else \
+                         ['/store/mc/RunIISummer20UL17MiniAODv2/BuToX3872Ks_X3872ToJPsiRho_JPsiToMuMu_RhoToPiPi_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/106X_mc2017_realistic_v9-v2/2810000/24AC8283-B363-734D-BCA5-E06B4F9CAFA7.root']
+    #['/store/user/soffi/BPH_BToXKs_XToJPsiRho_JPsiToMuMu/RunIISummer20UL17_MiniAOD/220424_143706/0000/MiniAOD_1.root','/store/user/soffi/BPH_BToXKs_XToJPsiRho_JPsiToMuMu/RunIISummer20UL17_MiniAOD/220424_143706/0000/MiniAOD_10.root','/store/user/soffi/BPH_BToXKs_XToJPsiRho_JPsiToMuMu/RunIISummer20UL17_MiniAOD/220424_143706/0000/MiniAOD_100.root','/store/user/soffi/BPH_BToXKs_XToJPsiRho_JPsiToMuMu/RunIISummer20UL17_MiniAOD/220424_143706/0000/MiniAOD_101.root','/store/user/soffi/BPH_BToXKs_XToJPsiRho_JPsiToMuMu/RunIISummer20UL17_MiniAOD/220424_143706/0000/MiniAOD_102.root','/store/user/soffi/BPH_BToXKs_XToJPsiRho_JPsiToMuMu/RunIISummer20UL17_MiniAOD/220424_143706/0000/MiniAOD_103.root','/store/user/soffi/BPH_BToXKs_XToJPsiRho_JPsiToMuMu/RunIISummer20UL17_MiniAOD/220424_143706/0000/MiniAOD_104.root','/store/user/soffi/BPH_BToXKs_XToJPsiRho_JPsiToMuMu/RunIISummer20UL17_MiniAOD/220424_143706/0000/MiniAOD_105.root','/store/user/soffi/BPH_BToXKs_XToJPsiRho_JPsiToMuMu/RunIISummer20UL17_MiniAOD/220424_143706/0000/MiniAOD_106.root','/store/user/soffi/BPH_BToXKs_XToJPsiRho_JPsiToMuMu/RunIISummer20UL17_MiniAOD/220424_143706/0000/MiniAOD_107.root','/store/user/soffi/BPH_BToXKs_XToJPsiRho_JPsiToMuMu/RunIISummer20UL17_MiniAOD/220424_143706/0000/MiniAOD_108.root','store/user/soffi/BPH_BToXKs_XToJPsiRho_JPsiToMuMu/RunIISummer20UL17_MiniAOD/220424_143706/0000/MiniAOD_109.root']
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
 #from Configuration.StandardSequences.Eras import eras
@@ -71,7 +73,7 @@ process.load('PhysicsTools.XNano.nanoX_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-process.MessageLogger.cerr.FwkReport.reportEvery = options.reportEvery
+#process.MessageLogger.cerr.FwkReport.reportEvery = options.reportEvery
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(options.maxEvents)
 )
