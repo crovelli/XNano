@@ -22,6 +22,8 @@
 #include "TrackingTools/PatternTools/interface/TSCBLBuilderNoMaterial.h"
 
 #include "helper.h"
+#include "TVectorD.h"    // for fixing tracks 
+#include "TMatrixDSym.h" // for fixing tracks 
 
 class TrackMerger : public edm::global::EDProducer<> {
 
@@ -51,6 +53,8 @@ public:
   
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
   
+  reco::Track fix_track(const reco::Track *tk, double delta) const;     
+
   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions) {}
   
 private:
@@ -239,7 +243,8 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   for( unsigned int iTrk=0; iTrk<numPresTracks; ++iTrk ) {
 
     pat::PackedCandidate trk = preselTracks[iTrk];
-    const reco::TransientTrack trackTT( (*trk.bestTrack()) , &(*bFieldHandle));
+    //const reco::TransientTrack trackTT( (*trk.bestTrack()) , &(*bFieldHandle));
+    const reco::TransientTrack trackTT( fix_track( &(*trk.bestTrack()), 1e-8 ), &(*bFieldHandle)); 
 
     // clean tracks wrt to all muons
     int matchedToMuon       = 0;
@@ -332,6 +337,50 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   evt.put(std::move(trans_tracks_out), "SelectedTransientTracks");
 }
 
+// O. Cerri's code to deal with not positive definite covariance matrices
+// https://github.com/ocerri/BPH_RDntuplizer/blob/master/plugins/VtxUtils.cc
+/* Check for a not positive definite covariance matrix. If the covariance matrix is not positive definite, we force it to be positive definite by
+ * adding the minimum eigenvalue to the diagonal of the covariance matrix plus `delta`.
+ * See https://nhigham.com/2020/12/22/what-is-a-modified-cholesky-factorization/ */
+
+reco::Track TrackMerger::fix_track(const reco::Track *tk, double delta) const {
+
+  unsigned int i, j;
+  double min_eig = 1;
+
+  // Get the original covariance matrix. 
+  reco::TrackBase::CovarianceMatrix cov = tk->covariance();
+
+  // Convert it from an SMatrix to a TMatrixD so we can get the eigenvalues. 
+  TMatrixDSym new_cov(cov.kRows);
+  for (i = 0; i < cov.kRows; i++) {
+    for (j = 0; j < cov.kRows; j++) {
+    // Need to check for nan or inf, because for some reason these
+    // cause a segfault when calling Eigenvectors().
+    //
+    // No idea what to do here or why this happens. 
+    if (std::isnan(cov(i,j)) || std::isinf(cov(i,j)))
+	cov(i,j) = 1e-6;
+      new_cov(i,j) = cov(i,j);
+    }
+  }
+
+  // Get the eigenvalues. 
+  TVectorD eig(cov.kRows);
+  new_cov.EigenVectors(eig);
+  for (i = 0; i < cov.kRows; i++)
+    if (eig(i) < min_eig)
+      min_eig = eig(i);
+
+  // If the minimum eigenvalue is less than zero, then subtract it from the
+  // diagonal and add `delta`. 
+  if (min_eig < 0) {
+    for (i = 0; i < cov.kRows; i++)
+      cov(i,i) -= min_eig - delta;
+  }
+
+  return reco::Track(tk->chi2(), tk->ndof(), tk->referencePoint(), tk->momentum(), tk->charge(), cov, tk->algo(), (reco::TrackBase::TrackQuality) tk->qualityMask());
+}
 
 
 
