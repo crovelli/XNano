@@ -14,7 +14,7 @@ tracksX = cms.EDProducer('TrackMerger',
                          ## trigger match  
                          bits = cms.InputTag("TriggerResults","","HLT"), 
                          objects = cms.InputTag("slimmedPatTrigger"), 
-                         drForTriggerMatch = cms.double(0.1),           # to be tuned
+                         drForTriggerMatch = cms.double(0.03), 
                          HLTPaths=cms.vstring(Path),
                          #
                          trkPtCut = cms.double(0.5),

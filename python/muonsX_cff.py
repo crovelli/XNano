@@ -14,7 +14,7 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  objects = cms.InputTag("slimmedPatTrigger"),
                                  
                                  ## trigger match
-                                 drForTriggerMatch = cms.double(0.1),        # to be tuned
+                                 drForTriggerMatch = cms.double(0.03),     
 
                                  ## for the output selected collection 
                                  ptMin = cms.double(0.5),                            
