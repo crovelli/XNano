@@ -70,7 +70,7 @@ BToK0sMuMuPiPi = cms.EDProducer(
     postVtxSelection2 = cms.string(
 #        'userFloat("fit_cos3D_PV") >= 0'
 #        '&& userFloat("lxySign_PV") >= 3'
-        'userFloat("lxySign_PV") >= 3'
+        'userFloat("lxySign_BSwithZ") >= 3'
     ),
     
     drMatchTrack = cms.double(0.05)
@@ -167,21 +167,26 @@ BToK0sMuMuPiPiTable = cms.EDProducer(
         decayVtxXE = ufloat('decayVtxXE'),
         decayVtxYE = ufloat('decayVtxYE'),
         decayVtxZE = ufloat('decayVtxZE'),
-        # Cos(theta) 
+        # Lxy and Cos(theta) 
         lxySign_PV = ufloat('lxySign_PV'),
         lxySign_BS = ufloat('lxySign_BS'),
+        lxySign_BSwithZ = ufloat('lxySign_BSwithZ'),
         cosAlpha3D_PV = ufloat('cosAlpha3D_PV'),
-        #cosAlpha2D_PV = ufloat('cosAlpha2D_PV'),
         cosAlpha2D_BS = ufloat('cosAlpha2D_BS'),
+        cosAlpha2D_BSwithZ = ufloat('cosAlpha2D_BSwithZ'),
         # vtx
         pv3D_idx = uint('pv3D_idx'),
-        #pv2D_idx = uint('pv2D_idx'),
         PVx  = ufloat('PVx'),
         PVy  = ufloat('PVy'),
         PVz  = ufloat('PVz'),
         PVEx = ufloat('PVEx'),
         PVEy = ufloat('PVEy'),
         PVEz = ufloat('PVEz'),
+        # BS
+        BSxRaw = ufloat('BSxRaw'),
+        BSyRaw = ufloat('BSyRaw'),
+        BSxWithZ = ufloat('BSxWithZ'),
+        BSyWithZ = ufloat('BSyWithZ'),        
         # mumu
         MuMu_sv_prob = ufloat('MuMu_sv_prob'),
         MuMu_fitted_mass = ufloat('MuMu_fitted_mass'),
@@ -271,7 +276,6 @@ BToK0sMuMuPiPiTable = cms.EDProducer(
         K0s_mcFitted_vtxZE = ufloat('K0s_mcFitted_vtxZE'),
         K0_lxySign_wrtBvtx = ufloat('K0_lxySign_wrtBvtx'),
         K0_cosAlpha3D = ufloat('K0_cosAlpha3D'),
-        #K0_cosAlpha2D = ufloat('K0_cosAlpha2D'),
         K0s_matchTrack1_D0sign = ufloat('K0s_matchTrack1_D0sign'),
         K0s_matchTrack2_D0sign = ufloat('K0s_matchTrack2_D0sign'),
         K0s_matchTrack1_maxD0Pv = ufloat('K0s_matchTrack1_maxD0Pv'),
