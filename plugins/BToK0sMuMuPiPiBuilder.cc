@@ -284,9 +284,6 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     int pv3D_idx = -1;
     Double_t lip3D = -1000.;
     math::XYZVector myBpt3D(fit_p4.Px(), fit_p4.Py(), fit_p4.Pz());
-    // int pv2D_idx = -1;
-    // Double_t lip2D = -1000.;
-    math::XYZVector myBpt2D(fit_p4.Px(), fit_p4.Py(), 0.);
     //
     for (size_t vtx_idx = 0; vtx_idx < pvtxs->size(); ++vtx_idx) {
 	  
@@ -299,40 +296,41 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
       double myDen3D = myDelta3D.R()*myBpt3D.R();
       double cosAlphaXYZb = (myDelta3D.Dot(myBpt3D))/myDen3D;
 
-      //math::XYZVector myDelta2D(dx, dy, 0.);
-      //double myDen2D = myDelta2D.R()*myBpt2D.R();
-      //double cosAlphaXYb = (myDelta2D.Dot(myBpt2D))/myDen2D;
-
       if (cosAlphaXYZb>lip3D) {
 	lip3D = cosAlphaXYZb;
 	pv3D_idx = vtx_idx;
       }
 
-      //if (cosAlphaXYb>lip2D) {
-      //lip2D = cosAlphaXYb;
-      //pv2D_idx = vtx_idx;
-      //}
-
     } // Loop over PVs
 
     // chosen PV
     cand.addUserInt("pv3D_idx", pv3D_idx);	
-    //cand.addUserInt("pv2D_idx", pv2D_idx);	
     edm::Ptr<reco::Vertex> chosenPV(pvtxs, pv3D_idx);
-
-
-    // CosAlpha 2Dim wrt beamspot
+    
+    // CosAlpha 2Dim wrt beamspot without z-correction
+    math::XYZVector myBpt2D(fit_p4.Px(), fit_p4.Py(), 0.);
     Double_t dxBS = fitted_vtx->position().x() - beamspot->x0();
     Double_t dyBS = fitted_vtx->position().y() - beamspot->y0();
     math::XYZVector myDeltaBS_2D(dxBS, dyBS, 0.);
     double myDenBS_2D = myDeltaBS_2D.R()*myBpt2D.R();
     double cosAlphaBS_XYb = (myDeltaBS_2D.Dot(myBpt2D))/myDenBS_2D;
 
+    // CosAlpha 2Dim wrt beamspot with z-correction
+    GlobalPoint the_fitted_vtx = fitted_vtx->position();
+    math::XYZVector myDeltaBS_2Dwithz(the_fitted_vtx.x() - (beamspot->position(the_fitted_vtx.z())).x(), the_fitted_vtx.y() - (beamspot->position(the_fitted_vtx.z())).y(), 0.);  
+    double myDenBS_2Dwithz = myDeltaBS_2Dwithz.R()*myBpt2D.R();
+    double cosAlphaBS_XYbWithZ = (myDeltaBS_2Dwithz.Dot(myBpt2D))/myDenBS_2Dwithz;
+
     // Save cosAlpha with different algos
     cand.addUserFloat("cosAlpha3D_PV", lip3D);
     cand.addUserFloat("cosAlpha2D_BS", cosAlphaBS_XYb);
-    // cand.addUserFloat("cosAlpha2D_PV", lip2D);
+    cand.addUserFloat("cosAlpha2D_BSwithZ", cosAlphaBS_XYbWithZ);
 
+    // Save BS coordinates
+    cand.addUserFloat("BSxRaw", beamspot->x0());
+    cand.addUserFloat("BSyRaw", beamspot->y0());
+    cand.addUserFloat("BSxWithZ", (beamspot->position(the_fitted_vtx.z())).x());
+    cand.addUserFloat("BSyWithZ", (beamspot->position(the_fitted_vtx.z())).y());
 
     // B vertex displacement significance wrt PV and BS
     float BSx   = beamspot->x0();
@@ -341,8 +339,8 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     float BSxE  = beamspot->covariance(0,0);
     float BSyE  = beamspot->covariance(1,1);
     float BSzE  = 0.;
-    float BSxyE = beamspot->covariance(0,1);
-    // 
+    float BSxyE = beamspot->covariance(0,1);    
+    //
     float chosenPVx   = chosenPV->x();
     float chosenPVy   = chosenPV->y();
     float chosenPVz   = 0.;
@@ -359,12 +357,7 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     float fittedVzE   = 0.;
     float fittedVxyE  = fitted_vtx->error().matrix()(0,1);
 
-    // First version (wrong?)
-    // float lxySign_PV = sqrt ( (chosenPVx-fittedVx)*(chosenPVx-fittedVx) / (chosenPVxE*chosenPVxE + fittedVxE)  +
-    //                    (chosenPVy-fittedVy)*(chosenPVy-fittedVy) / (chosenPVyE*chosenPVyE + fittedVyE)  );
-
-    // New version
-    // Uncertainty is the same as with the code below; the value is very very close, there is a small difference due to the dxdz() etc part 
+    // wrt PV chosen above
     float LxyB_PV = sqrt( (fittedVx-chosenPVx)*(fittedVx-chosenPVx) + (fittedVy-chosenPVy)*(fittedVy-chosenPVy) + (fittedVz-chosenPVz)*(fittedVz-chosenPVz) );
     float LxyBErr_PV = -1;
     if (LxyB_PV > 0.)
@@ -384,6 +377,7 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
 			(fittedVx-chosenPVx) * (fittedVz-chosenPVz) * 2.*0. +
 			(fittedVy-chosenPVy) * (fittedVz-chosenPVz) * 2.*0.) / LxyB_PV;
 
+    // wrt BS without z correction
     float LxyB_BS = sqrt( (fittedVx-BSx)*(fittedVx-BSx) + (fittedVy-BSy)*(fittedVy-BSy) + (fittedVz-BSz)*(fittedVz-BSz) );
     float LxyBErr_BS = -1;
     if (LxyB_BS > 0.)
@@ -403,15 +397,15 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
 			(fittedVx-BSx) * (fittedVz-BSz) * 2.*0. +
 			(fittedVy-BSy) * (fittedVz-BSz) * 2.*0.) / LxyB_BS;
     
-    // Done as at HLT
-    // GlobalError fitted_vtx_err( fitted_vtx->error().cxx(), fitted_vtx->error().cyx(), fitted_vtx->error().cyy(), fitted_vtx->error().czx(), fitted_vtx->error().czy(), fitted_vtx->error().czz() );
-    // GlobalPoint dispFromBS( -1*( (beamspot->x0() - fitted_vtx->position().x()) + (fitted_vtx->position().z() - beamspot->z0()) * beamspot->dxdz()), -1*((beamspot->y0() - fitted_vtx->position().y()) + (fitted_vtx->position().z() - beamspot->z0()) * beamspot->dydz()), 0);
-    // float tlxy = dispFromBS.perp();
-    // float tlxyerr = sqrt(fitted_vtx_err.rerr(dispFromBS));
-    
+    // wrt BS with z correction (done as at HLT)
+    GlobalError fitted_vtx_err( fitted_vtx->error().cxx(), fitted_vtx->error().cyx(), fitted_vtx->error().cyy(), fitted_vtx->error().czx(), fitted_vtx->error().czy(), fitted_vtx->error().czz() );
+    GlobalPoint dispFromBS( -1*( (beamspot->x0() - fitted_vtx->position().x()) + (fitted_vtx->position().z() - beamspot->z0()) * beamspot->dxdz()), -1*((beamspot->y0() - fitted_vtx->position().y()) + (fitted_vtx->position().z() - beamspot->z0()) * beamspot->dydz()), 0);
+    float LxyB_BSwithZ = dispFromBS.perp();
+    float LxyBErr_BSwithZ = sqrt(fitted_vtx_err.rerr(dispFromBS));
+
     cand.addUserFloat("lxySign_PV", LxyB_PV/LxyBErr_PV);
     cand.addUserFloat("lxySign_BS", LxyB_BS/LxyBErr_BS); 
-
+    cand.addUserFloat("lxySign_BSwithZ", LxyB_BSwithZ/LxyBErr_BSwithZ); 
 
     // post fit selection
     if( !post_vtx_selection2_(cand) ) continue;        
@@ -569,7 +563,6 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     TLorentzVector p4K0s;
     p4K0s.SetPtEtaPhiM(cand.userFloat("K0s_mcFitted_pt"), cand.userFloat("K0s_mcFitted_eta"), cand.userFloat("K0s_mcFitted_phi"), KSHORT_MASS);
     math::XYZVector myK0pt3D(p4K0s.Px(), p4K0s.Py(), p4K0s.Pz());
-    // math::XYZVector myK0pt2D(p4K0s.Px(), p4K0s.Py(), 0.);
     //
     Double_t dxK0s = fitted_vtx->position().x() - k0sPVx;
     Double_t dyK0s = fitted_vtx->position().y() - k0sPVy;
@@ -579,12 +572,7 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     double myK0BDen3D = myK0BDelta3D.R()*myK0pt3D.R();
     double cosAlphaK0BXYZ = (myK0BDelta3D.Dot(myK0pt3D))/myK0BDen3D;
     //
-    // math::XYZVector myK0BDelta2D(dxK0s, dyK0s, 0.);
-    // double myK0BDen2D = myK0BDelta2D.R()*myK0pt2D.R();
-    // double cosAlphaK0BXY = (myK0BDelta2D.Dot(myK0pt2D))/myK0BDen2D;
-    //
     cand.addUserFloat("K0_cosAlpha3D", cosAlphaK0BXYZ);     
-    // cand.addUserFloat("K0_cosAlpha2D", cosAlphaK0BXY);     
 
 
     // To emulate the trigger: look for tracks in the collection 
