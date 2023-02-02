@@ -467,13 +467,13 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     cand.addUserFloat("MuMu_mu2_dxysign", dxySignMu2);
     cand.addUserInt("MuMu_mu1_trackQuality", ll_ptr->userInt("mu1_trackQuality")); 
     cand.addUserInt("MuMu_mu2_trackQuality", ll_ptr->userInt("mu2_trackQuality")); 
-    cand.addUserInt("MuMu_mu1_fired_Dimuon25_Jpsi",               ll_ptr->userInt("mu1_fired_Dimuon25_Jpsi"));
+    cand.addUserInt("MuMu_mu1_fired_Dimuon20_Jpsi",               ll_ptr->userInt("mu1_fired_Dimuon20_Jpsi"));
     cand.addUserInt("MuMu_mu1_fired_DoubleMu4_JpsiTrk_Displaced", ll_ptr->userInt("mu1_fired_DoubleMu4_JpsiTrk_Displaced"));
-    cand.addUserInt("MuMu_mu2_fired_Dimuon25_Jpsi",               ll_ptr->userInt("mu2_fired_Dimuon25_Jpsi"));
+    cand.addUserInt("MuMu_mu2_fired_Dimuon20_Jpsi",               ll_ptr->userInt("mu2_fired_Dimuon20_Jpsi"));
     cand.addUserInt("MuMu_mu2_fired_DoubleMu4_JpsiTrk_Displaced", ll_ptr->userInt("mu2_fired_DoubleMu4_JpsiTrk_Displaced"));
-    cand.addUserFloat("MuMu_mu1_dr_Dimuon25_Jpsi",                ll_ptr->userFloat("mu1_dr_Dimuon25_Jpsi"));
+    cand.addUserFloat("MuMu_mu1_dr_Dimuon20_Jpsi",                ll_ptr->userFloat("mu1_dr_Dimuon20_Jpsi"));
     cand.addUserFloat("MuMu_mu1_dr_DoubleMu4_JpsiTrk_Displaced",  ll_ptr->userFloat("mu1_dr_DoubleMu4_JpsiTrk_Displaced"));
-    cand.addUserFloat("MuMu_mu2_dr_Dimuon25_Jpsi",                ll_ptr->userFloat("mu2_dr_Dimuon25_Jpsi"));
+    cand.addUserFloat("MuMu_mu2_dr_Dimuon20_Jpsi",                ll_ptr->userFloat("mu2_dr_Dimuon20_Jpsi"));
     cand.addUserFloat("MuMu_mu2_dr_DoubleMu4_JpsiTrk_Displaced",  ll_ptr->userFloat("mu2_dr_DoubleMu4_JpsiTrk_Displaced"));
 
     // Save all wanted infos: PiPi (from Rho)-related

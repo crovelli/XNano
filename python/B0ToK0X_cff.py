@@ -216,13 +216,13 @@ BToK0sMuMuPiPiTable = cms.EDProducer(
         MuMu_mu2_dxysign = ufloat('MuMu_mu2_dxysign'),
         MuMu_mu1_trackQuality = uint('MuMu_mu1_trackQuality'),
         MuMu_mu2_trackQuality = uint('MuMu_mu2_trackQuality'),
-        MuMu_mu1_fired_Dimuon25_Jpsi                = uint('MuMu_mu1_fired_Dimuon25_Jpsi'),
+        MuMu_mu1_fired_Dimuon20_Jpsi                = uint('MuMu_mu1_fired_Dimuon20_Jpsi'),
         MuMu_mu1_fired_DoubleMu4_JpsiTrk_Displaced  = uint('MuMu_mu1_fired_DoubleMu4_JpsiTrk_Displaced'),
-        MuMu_mu2_fired_Dimuon25_Jpsi                = uint('MuMu_mu2_fired_Dimuon25_Jpsi'),
+        MuMu_mu2_fired_Dimuon20_Jpsi                = uint('MuMu_mu2_fired_Dimuon20_Jpsi'),
         MuMu_mu2_fired_DoubleMu4_JpsiTrk_Displaced  = uint('MuMu_mu2_fired_DoubleMu4_JpsiTrk_Displaced'),
-        MuMu_mu1_dr_Dimuon25_Jpsi                   = ufloat('MuMu_mu1_dr_Dimuon25_Jpsi'),
+        MuMu_mu1_dr_Dimuon20_Jpsi                   = ufloat('MuMu_mu1_dr_Dimuon20_Jpsi'),
         MuMu_mu1_dr_DoubleMu4_JpsiTrk_Displaced     = ufloat('MuMu_mu1_dr_DoubleMu4_JpsiTrk_Displaced'),
-        MuMu_mu2_dr_Dimuon25_Jpsi                   = ufloat('MuMu_mu2_dr_Dimuon25_Jpsi'),
+        MuMu_mu2_dr_Dimuon20_Jpsi                   = ufloat('MuMu_mu2_dr_Dimuon20_Jpsi'),
         MuMu_mu2_dr_DoubleMu4_JpsiTrk_Displaced     = ufloat('MuMu_mu2_dr_DoubleMu4_JpsiTrk_Displaced'),
 
         # pipi   

@@ -174,14 +174,14 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       muon_pair.addUserInt("mu2_trackQuality",  l2_ptr->userInt("trackQuality"));
 
       // save further quantities, to be saved in the final ntuples: fired paths
-      muon_pair.addUserInt("mu1_fired_Dimuon25_Jpsi",      l1_ptr->userInt("HLT_Dimuon25_Jpsi"));
+      muon_pair.addUserInt("mu1_fired_Dimuon20_Jpsi",      l1_ptr->userInt("HLT_Dimuon20_Jpsi"));
       muon_pair.addUserInt("mu1_fired_DoubleMu4_JpsiTrk_Displaced",     l1_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced"));
-      muon_pair.addUserInt("mu2_fired_Dimuon25_Jpsi",      l2_ptr->userInt("HLT_Dimuon25_Jpsi"));
+      muon_pair.addUserInt("mu2_fired_Dimuon20_Jpsi",      l2_ptr->userInt("HLT_Dimuon20_Jpsi"));
       muon_pair.addUserInt("mu2_fired_DoubleMu4_JpsiTrk_Displaced",     l2_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced"));
 
-      muon_pair.addUserFloat("mu1_dr_Dimuon25_Jpsi",      l1_ptr->userFloat("HLT_Dimuon25_Jpsi_dr"));
+      muon_pair.addUserFloat("mu1_dr_Dimuon20_Jpsi",      l1_ptr->userFloat("HLT_Dimuon20_Jpsi_dr"));
       muon_pair.addUserFloat("mu1_dr_DoubleMu4_JpsiTrk_Displaced",     l1_ptr->userFloat("HLT_DoubleMu4_JpsiTrk_Displaced_dr"));
-      muon_pair.addUserFloat("mu2_dr_Dimuon25_Jpsi",      l2_ptr->userFloat("HLT_Dimuon25_Jpsi_dr"));
+      muon_pair.addUserFloat("mu2_dr_Dimuon20_Jpsi",      l2_ptr->userFloat("HLT_Dimuon20_Jpsi_dr"));
       muon_pair.addUserFloat("mu2_dr_DoubleMu4_JpsiTrk_Displaced",     l2_ptr->userFloat("HLT_DoubleMu4_JpsiTrk_Displaced_dr"));
 
       // push in the event
