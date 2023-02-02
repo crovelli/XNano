@@ -15,6 +15,10 @@ samples:
     dataset: /BuToX3872Ks_X3872ToJPsiRho_JPsiToMuMu_RhoToPiPi_TuneCP5_13TeV-pythia8-evtgen/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM
     isMC: True
   #  
+  BdToPsi2SKs2018:
+    dataset: /BuToPsi2SKs_Psi2SToJPsiPiPi_JPsiToMuMu_RhoToPiPi_TuneCP5_13TeV-pythia8-evtgen/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM
+    isMC: True
+  #  
   HbToJPsiMuMu:  
     dataset: /HbToJPsiMuMu_3MuFilter_TuneCP5_13TeV-pythia8-evtgen/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1_ext1-v3/MINIAODSIM
     isMC: True
