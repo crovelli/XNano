@@ -93,7 +93,7 @@ TrgBitTableProducer::produce( edm::Event &evt, edm::EventSetup const &stp)
   auto tab  = std::make_unique<nanoaod::FlatTable>(1,"", true);
   for (unsigned int ipath = 0; ipath <Npaths; ++ipath ){
     //std::cout << "ipath = " << ipath << ", hltpaths_[ipath] = " << hltpaths_[ipath] << ", hltbits[ipath] = " << hltbits[ipath] << std::endl; 
-    tab->addColumnValue<int> (hltpaths_[ipath], hltbits[ipath], "hlt path", nanoaod::FlatTable::IntColumn);
+    tab->addColumnValue<int> (hltpaths_[ipath], hltbits[ipath], "hlt path");
   }
 
   evt.put(std::move(tab));

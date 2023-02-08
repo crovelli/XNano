@@ -61,7 +61,7 @@ class CandMCMatchTableProducerX : public edm::global::EDProducer<> {
             iEvent.getByToken(src_, cands);
             unsigned int ncand = cands->size();
 
-            auto tab  = std::make_unique<nanoaod::FlatTable>(ncand, objName_, false, true);
+            auto tab = std::make_unique<nanoaod::FlatTable>(ncand, objName_, false, true);
 
             edm::Handle<edm::Association<reco::GenParticleCollection>> map;
             iEvent.getByToken(candMap_, map);
@@ -109,8 +109,8 @@ class CandMCMatchTableProducerX : public edm::global::EDProducer<> {
                 };
             }    
             
-            tab->addColumn<int>(branchName_+"Idx",  key, "Index into genParticle list for "+doc_, nanoaod::FlatTable::IntColumn);
-	    tab->addColumn<int>(branchName_+"Flav", flav, "Flavour of genParticle for "+doc_+": "+flavDoc_, nanoaod::FlatTable::IntColumn);
+            tab->addColumn<int>(branchName_+"Idx",  key, "Index into genParticle list for "+doc_);
+	    tab->addColumn<int>(branchName_+"Flav", flav, "Flavour of genParticle for "+doc_+": "+flavDoc_);
 
             iEvent.put(std::move(tab));
         }

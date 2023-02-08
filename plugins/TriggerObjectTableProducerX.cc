@@ -138,10 +138,10 @@ TriggerObjectTableProducerX::produce(edm::Event& iEvent, const edm::EventSetup& 
     }
 
     auto tab  = std::make_unique<nanoaod::FlatTable>(nobj, name_, false, false);
-    tab->addColumn<int>("id", id, idDoc_, nanoaod::FlatTable::IntColumn);
-    tab->addColumn<float>("pt", pt, "pt", nanoaod::FlatTable::FloatColumn, 12);
-    tab->addColumn<float>("eta", eta, "eta", nanoaod::FlatTable::FloatColumn, 12);
-    tab->addColumn<float>("phi", phi, "phi", nanoaod::FlatTable::FloatColumn, 12);
+    tab->addColumn<int>("id", id, idDoc_);
+    tab->addColumn<float>("pt", pt, "pt", 12);
+    tab->addColumn<float>("eta", eta, "eta", 12);
+    tab->addColumn<float>("phi", phi, "phi", 12);
     iEvent.put(std::move(tab));
 }
 
