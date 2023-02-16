@@ -1,5 +1,5 @@
+import CRABClient
 from CRABClient.UserUtilities import config, ClientException, getUsernameFromCRIC
-#from input_crab_data import dataset_files
 import yaml
 import datetime
 from fnmatch import fnmatch
@@ -38,16 +38,17 @@ if __name__ == '__main__':
 
   from CRABAPI.RawCommand import crabCommand
   from CRABClient.ClientExceptions import ClientException
-  from httplib import HTTPException
+  #from httplib import HTTPException
+  from http.client import HTTPException
   from multiprocessing import Process
 
   def submit(config):
       try:
           crabCommand('submit', config = config)
       except HTTPException as hte:
-          print "Failed submitting task: %s" % (hte.headers)
+          print("Failed submitting task:",hte.headers)
       except ClientException as cle:
-          print "Failed submitting task: %s" % (cle)
+          print("Failed submitting task:",cle)
 
 
   parser = ArgumentParser()
@@ -56,11 +57,15 @@ if __name__ == '__main__':
   args = parser.parse_args()
 
   with open(args.yaml) as f:
-    doc = yaml.load(f) # Parse YAML file
+    #doc = yaml.load(f) # Parse YAML file
+    doc = yaml.load(f,Loader=yaml.FullLoader) # Parse YAML file
     common = doc['common'] if 'common' in doc else {'data' : {}, 'mc' : {}}
     
     # loop over samples
-    for sample, info in doc['samples'].iteritems():
+    for sample, info in doc['samples'].items():
+    #for sample, info in doc['samples'].iteritems():
+      # Input DBS
+      input_dbs = info['dbs'] if 'dbs' in info else None
       # Given we have repeated datasets check for different parts
       parts = info['parts'] if 'parts' in info else [None]
       for part in parts:
@@ -68,7 +73,7 @@ if __name__ == '__main__':
         
         # filter names according to what we need
         if not fnmatch(name, args.filter): continue
-        print 'submitting', name
+        print('submitting', name)
 
         isMC = info['isMC']
 
@@ -104,6 +109,7 @@ if __name__ == '__main__':
         
         config.JobType.outputFiles = ['_'.join(['xNANO', 'mc' if isMC else 'data', production_tag])+'.root']
         
-        print config
+        print()
+        print(config)
         submit(config)
 
