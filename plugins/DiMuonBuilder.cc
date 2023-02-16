@@ -174,15 +174,33 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       muon_pair.addUserInt("mu2_trackQuality",  l2_ptr->userInt("trackQuality"));
 
       // save further quantities, to be saved in the final ntuples: fired paths
-      muon_pair.addUserInt("mu1_fired_Dimuon25_Jpsi",      l1_ptr->userInt("HLT_Dimuon25_Jpsi"));
-      muon_pair.addUserInt("mu1_fired_DoubleMu4_JpsiTrk_Displaced",     l1_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced"));
-      muon_pair.addUserInt("mu2_fired_Dimuon25_Jpsi",      l2_ptr->userInt("HLT_Dimuon25_Jpsi"));
-      muon_pair.addUserInt("mu2_fired_DoubleMu4_JpsiTrk_Displaced",     l2_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced"));
+      muon_pair.addUserInt("mu1_fired_Dimuon25_Jpsi",        l1_ptr->userInt("HLT_Dimuon25_Jpsi"));
+      muon_pair.addUserInt("mu1_fired_DoubleMu4_JpsiTrk_Bc", l1_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Bc"));
+      muon_pair.addUserInt("mu1_fired_DoubleMu4_JpsiTrkTrk_Displaced", l1_ptr->userInt("HLT_DoubleMu4_JpsiTrkTrk_Displaced"));
+      muon_pair.addUserInt("mu1_fired_DoubleMu4_LowMass_Displaced", l1_ptr->userInt("HLT_DoubleMu4_LowMass_Displaced"));
+      muon_pair.addUserInt("mu1_fired_DoubleMu4_MuMuTrk_Displaced", l1_ptr->userInt("HLT_DoubleMu4_MuMuTrk_Displaced"));
+      muon_pair.addUserInt("mu1_fired_DoubleMu4_3_LowMass", l1_ptr->userInt("HLT_DoubleMu4_3_LowMass"));
 
-      muon_pair.addUserFloat("mu1_dr_Dimuon25_Jpsi",      l1_ptr->userFloat("HLT_Dimuon25_Jpsi_dr"));
-      muon_pair.addUserFloat("mu1_dr_DoubleMu4_JpsiTrk_Displaced",     l1_ptr->userFloat("HLT_DoubleMu4_JpsiTrk_Displaced_dr"));
-      muon_pair.addUserFloat("mu2_dr_Dimuon25_Jpsi",      l2_ptr->userFloat("HLT_Dimuon25_Jpsi_dr"));
-      muon_pair.addUserFloat("mu2_dr_DoubleMu4_JpsiTrk_Displaced",     l2_ptr->userFloat("HLT_DoubleMu4_JpsiTrk_Displaced_dr"));
+      muon_pair.addUserInt("mu2_fired_Dimuon25_Jpsi",        l2_ptr->userInt("HLT_Dimuon25_Jpsi"));
+      muon_pair.addUserInt("mu2_fired_DoubleMu4_JpsiTrk_Bc", l2_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Bc"));
+      muon_pair.addUserInt("mu2_fired_DoubleMu4_JpsiTrkTrk_Displaced", l2_ptr->userInt("HLT_DoubleMu4_JpsiTrkTrk_Displaced"));
+      muon_pair.addUserInt("mu2_fired_DoubleMu4_LowMass_Displaced", l2_ptr->userInt("HLT_DoubleMu4_LowMass_Displaced"));
+      muon_pair.addUserInt("mu2_fired_DoubleMu4_MuMuTrk_Displaced", l2_ptr->userInt("HLT_DoubleMu4_MuMuTrk_Displaced"));
+      muon_pair.addUserInt("mu2_fired_DoubleMu4_3_LowMass", l2_ptr->userInt("HLT_DoubleMu4_3_LowMass"));
+
+      muon_pair.addUserFloat("mu1_dr_Dimuon25_Jpsi",        l1_ptr->userFloat("HLT_Dimuon25_Jpsi_dr"));
+      muon_pair.addUserFloat("mu1_dr_DoubleMu4_JpsiTrk_Bc", l1_ptr->userFloat("HLT_DoubleMu4_JpsiTrk_Bc_dr"));
+      muon_pair.addUserFloat("mu1_dr_DoubleMu4_JpsiTrkTrk_Displaced", l1_ptr->userFloat("HLT_DoubleMu4_JpsiTrkTrk_Displaced_dr"));
+      muon_pair.addUserFloat("mu1_dr_DoubleMu4_LowMass_Displaced", l1_ptr->userFloat("HLT_DoubleMu4_LowMass_Displaced_dr"));
+      muon_pair.addUserFloat("mu1_dr_DoubleMu4_MuMuTrk_Displaced", l1_ptr->userFloat("HLT_DoubleMu4_MuMuTrk_Displaced_dr"));
+      muon_pair.addUserFloat("mu1_dr_DoubleMu4_3_LowMass", l1_ptr->userFloat("HLT_DoubleMu4_3_LowMass_dr"));
+
+      muon_pair.addUserFloat("mu2_dr_Dimuon25_Jpsi",        l2_ptr->userFloat("HLT_Dimuon25_Jpsi_dr"));
+      muon_pair.addUserFloat("mu2_dr_DoubleMu4_JpsiTrk_Bc", l2_ptr->userFloat("HLT_DoubleMu4_JpsiTrk_Bc_dr"));
+      muon_pair.addUserFloat("mu2_dr_DoubleMu4_JpsiTrkTrk_Displaced", l2_ptr->userFloat("HLT_DoubleMu4_JpsiTrkTrk_Displaced_dr"));
+      muon_pair.addUserFloat("mu2_dr_DoubleMu4_LowMass_Displaced", l2_ptr->userFloat("HLT_DoubleMu4_LowMass_Displaced_dr"));
+      muon_pair.addUserFloat("mu2_dr_DoubleMu4_MuMuTrk_Displaced", l2_ptr->userFloat("HLT_DoubleMu4_MuMuTrk_Displaced_dr"));
+      muon_pair.addUserFloat("mu2_dr_DoubleMu4_3_LowMass", l2_ptr->userFloat("HLT_DoubleMu4_3_LowMass_dr"));
 
       // push in the event
       ret_value->push_back(muon_pair);

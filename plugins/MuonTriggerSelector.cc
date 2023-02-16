@@ -48,7 +48,8 @@ private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
   reco::Track fix_track(const reco::Track *tk, double delta) const;  
-  
+
+  const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bFieldToken_;  
   edm::EDGetTokenT<std::vector<pat::Muon>> muonSrc_;
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
   edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
@@ -66,6 +67,8 @@ private:
 
 
 MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
+  bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
+  //
   muonSrc_( consumes<std::vector<pat::Muon>> ( iConfig.getParameter<edm::InputTag>( "muonCollection" ) ) ),
   //
   beamSpotSrc_(consumes<reco::BeamSpot>( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
@@ -85,9 +88,8 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
 }
 
 void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  
-  edm::ESHandle<MagneticField> bFieldHandle;
-  iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
+
+  const auto& bField = iSetup.getData(bFieldToken_);
 
   edm::Handle<reco::BeamSpot> beamSpotHandle;
   iEvent.getByToken(beamSpotSrc_, beamSpotHandle);
@@ -277,7 +279,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     if( fabs(muon.eta())>absEtaMax_ ) continue;
 
     //const reco::TransientTrack muonTT((*(muon.bestTrack())),&(*bFieldHandle));  
-    const reco::TransientTrack muonTT( fix_track( &(*muon.bestTrack()), 1e-8 ), &(*bFieldHandle));    
+    const reco::TransientTrack muonTT( fix_track( &(*muon.bestTrack()), 1e-8 ), &bField);
 
     if(!muonTT.isValid()) continue; 
     

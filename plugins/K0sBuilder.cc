@@ -45,6 +45,7 @@ public:
 
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
 
+    transientTrackRecordToken_(esConsumes(edm::ESInputTag("", "TransientTrackBuilder"))),
     dimuons_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("dimuons") )},    
     dipions_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("dipion") )},
     svs_{consumes<reco::VertexCompositePtrCandidateCollection>( cfg.getParameter<edm::InputTag>("svSrc") )} {
@@ -67,6 +68,7 @@ private:
 
   reco::Track fix_track(const reco::Track *tk, double delta) const;
   
+  const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> transientTrackRecordToken_;
   const edm::EDGetTokenT<pat::CompositeCandidateCollection> dimuons_;
   const edm::EDGetTokenT<pat::CompositeCandidateCollection> dipions_;
   const edm::EDGetTokenT<reco::VertexCompositePtrCandidateCollection> svs_;
@@ -76,15 +78,13 @@ private:
 void K0sBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &iSetup ) const {
 
   // inputs  
+  auto const& theB = iSetup.getHandle(transientTrackRecordToken_);
   edm::Handle<pat::CompositeCandidateCollection> dimuons;
   evt.getByToken(dimuons_, dimuons);  
   edm::Handle<pat::CompositeCandidateCollection> dipions;
   evt.getByToken(dipions_, dipions);  
   edm::Handle<reco::VertexCompositePtrCandidateCollection> v0Coll;
   evt.getByToken(svs_, v0Coll);
-
-  edm::ESHandle<TransientTrackBuilder> theB;
-  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", theB);
 
   // output 
   std::unique_ptr<pat::CompositeCandidateCollection> k0s_out(new pat::CompositeCandidateCollection());

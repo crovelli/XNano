@@ -23,13 +23,12 @@ from PhysicsTools.XNano.B0ToK0X_cff import *
 nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectXTables + l1bits)
 
 nanoSequence = cms.Sequence(nanoMetadata + 
-                            vertexSequence +           
-                            globalTables + vertexTables + 
+                            cms.Sequence(vertexTask) +           
+                            cms.Sequence(globalTablesTask) + cms.Sequence(vertexTablesTask) +
                             triggerObjectXTables + l1bits)
 
 nanoSequenceMC = cms.Sequence(particleLevelXSequence + genParticleXSequence + 
-                              globalTablesMC + genWeightsTable + genParticleXTables + lheInfoTable) 
-
+                              cms.Sequence(globalTablesMCTask) + cms.Sequence(genWeightsTableTask) + genParticleXTables + lheInfoTable)
 
 def nanoAOD_customizeMuonTriggerX(process):
     process.nanoSequence = cms.Sequence( process.nanoSequence + muonXSequence + muonXTables)

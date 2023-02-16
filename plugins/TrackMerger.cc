@@ -31,6 +31,7 @@ class TrackMerger : public edm::global::EDProducer<> {
 public:
   
   explicit TrackMerger(const edm::ParameterSet &cfg):
+    bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),  
     beamSpotSrc_(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamSpot"))),
     tracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("tracks"))),
     lostTracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lostTracks"))),
@@ -58,6 +59,8 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions) {}
   
 private:
+
+  const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bFieldToken_;
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> tracksToken_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> lostTracksToken_;
@@ -85,10 +88,8 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   if ( ! beamSpotHandle.isValid() ) {
     edm::LogError("BToKstllProducer") << "No beam spot available from Event" ;
   }  
-  
-  edm::ESHandle<MagneticField> bFieldHandle;
-  stp.get<IdealMagneticFieldRecord>().get(bFieldHandle);
-  const MagneticField* magField = bFieldHandle.product();
+
+  const auto& bField = stp.getData(bFieldToken_);
 
   edm::Handle<pat::PackedCandidateCollection> tracks;
   evt.getByToken(tracksToken_, tracks);
@@ -244,7 +245,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
 
     pat::PackedCandidate trk = preselTracks[iTrk];
     //const reco::TransientTrack trackTT( (*trk.bestTrack()) , &(*bFieldHandle));
-    const reco::TransientTrack trackTT( fix_track( &(*trk.bestTrack()), 1e-8 ), &(*bFieldHandle)); 
+    const reco::TransientTrack trackTT( fix_track( &(*trk.bestTrack()), 1e-8 ), &bField ); 
 
     // clean tracks wrt to all muons
     int matchedToMuon       = 0;
@@ -272,7 +273,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     GlobalPoint thegpos( thepos);
     Basic3DVector<float> themom( trk.bestTrack()->momentum());
     GlobalVector thegmom( themom);
-    GlobalTrajectoryParameters thepar( thegpos, thegmom, trk.bestTrack()->charge(), magField);
+    GlobalTrajectoryParameters thepar( thegpos, thegmom, trk.bestTrack()->charge(), &bField);
     CurvilinearTrajectoryError theerr( trk.bestTrack()->covariance());
     FreeTrajectoryState InitialFTS( thepar, theerr); 
 

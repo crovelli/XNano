@@ -154,10 +154,20 @@ void PiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
 	pipi_cand.addUserFloat("pi2_maxd0PV", trk2_ptr->userFloat("maxd0PV"));
 	pipi_cand.addUserFloat("pi1_mind0PV", trk1_ptr->userFloat("mind0PV"));
 	pipi_cand.addUserFloat("pi2_mind0PV", trk2_ptr->userFloat("mind0PV"));
-	pipi_cand.addUserInt("p1_fired_DoubleMu4_JpsiTrk_Displaced", trk1_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced"));
-	pipi_cand.addUserInt("p2_fired_DoubleMu4_JpsiTrk_Displaced", trk2_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Displaced"));
-	pipi_cand.addUserFloat("p1_dr_DoubleMu4_JpsiTrk_Displaced", trk1_ptr->userFloat("HLT_DoubleMu4_JpsiTrk_Displaced_dr"));
-	pipi_cand.addUserFloat("p2_dr_DoubleMu4_JpsiTrk_Displaced", trk2_ptr->userFloat("HLT_DoubleMu4_JpsiTrk_Displaced_dr"));
+
+	pipi_cand.addUserInt("p1_fired_DoubleMu4_JpsiTrk_Bc", trk1_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Bc"));
+	pipi_cand.addUserInt("p1_fired_DoubleMu4_JpsiTrkTrk_Displaced", trk1_ptr->userInt("HLT_DoubleMu4_JpsiTrkTrk_Displaced"));
+	pipi_cand.addUserInt("p1_fired_DoubleMu4_MuMuTrk_Displaced", trk1_ptr->userInt("HLT_DoubleMu4_MuMuTrk_Displaced"));
+	pipi_cand.addUserInt("p2_fired_DoubleMu4_JpsiTrk_Bc", trk2_ptr->userInt("HLT_DoubleMu4_JpsiTrk_Bc"));
+	pipi_cand.addUserInt("p2_fired_DoubleMu4_JpsiTrkTrk_Displaced", trk2_ptr->userInt("HLT_DoubleMu4_JpsiTrkTrk_Displaced"));
+	pipi_cand.addUserInt("p2_fired_DoubleMu4_MuMuTrk_Displaced", trk2_ptr->userInt("HLT_DoubleMu4_MuMuTrk_Displaced"));
+
+	pipi_cand.addUserFloat("p1_dr_DoubleMu4_JpsiTrk_Bc", trk1_ptr->userFloat("HLT_DoubleMu4_JpsiTrk_Bc_dr"));
+	pipi_cand.addUserFloat("p1_dr_DoubleMu4_JpsiTrkTrk_Displaced", trk1_ptr->userFloat("HLT_DoubleMu4_JpsiTrkTrk_Displaced_dr"));
+	pipi_cand.addUserFloat("p1_dr_DoubleMu4_MuMuTrk_Displaced", trk1_ptr->userFloat("HLT_DoubleMu4_MuMuTrk_Displaced_dr"));
+	pipi_cand.addUserFloat("p2_dr_DoubleMu4_JpsiTrk_Bc", trk2_ptr->userFloat("HLT_DoubleMu4_JpsiTrk_Bc_dr"));
+	pipi_cand.addUserFloat("p2_dr_DoubleMu4_JpsiTrkTrk_Displaced", trk2_ptr->userFloat("HLT_DoubleMu4_JpsiTrkTrk_Displaced_dr"));
+	pipi_cand.addUserFloat("p2_dr_DoubleMu4_MuMuTrk_Displaced", trk2_ptr->userFloat("HLT_DoubleMu4_MuMuTrk_Displaced_dr"));
 
 	// Put in the event
 	pipi_out->push_back(pipi_cand);
