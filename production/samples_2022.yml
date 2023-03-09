@@ -1,6 +1,6 @@
 common:
   data:
-    lumimask : /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_MuonJSON.txt
+    lumimask : https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions22/Cert_Collisions2022_355100_362760_Muon.json
     splitting: 20
     globaltag: 124X_dataRun3_v14
   mc:
@@ -11,8 +11,12 @@ samples:
   #
   #  MC
   #  
-  BdToPsi2SKs2022:
+  BdToPsi2SKs2022Private:
     dataset: /BPH_BToPsi2SKs_Psi2SToJPsiPiPi_JPsiToMuMu_McM_Run3/soffi-Run3Summer22_MiniAODv3-c243ef01acc2bc7489d3e73ffb316559/USER
+    isMC: True  
+  #
+  BdToPsi2SKs2022:
+    dataset: /BuToPsi2SKs_Psi2SToJPsiPiPi_JPsiToMuMu_RhoToPiPi_TuneCP5_13p6TeV_pythia8-evtgen/Run3Summer22MiniAODv3-124X_mcRun3_2022_realistic_v12-v2/MINIAODSIM
     isMC: True  
   #
   #  DATA
