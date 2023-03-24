@@ -24,7 +24,8 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
 
 # we need at least 2 triggering muons
 countTrgMuons = cms.EDFilter("PATCandViewCountFilter",
-    minNumber = cms.uint32(2),
+    #minNumber = cms.uint32(2),
+    minNumber = cms.uint32(0),
     maxNumber = cms.uint32(999999),
     src = cms.InputTag("muonTrgSelector", "trgMuons")
 )
