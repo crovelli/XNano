@@ -163,7 +163,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
 
     // Loop over trigger paths
     int ipath=-1;
-    for (const std::string path: HLTPaths_){
+    for (const std::string &path: HLTPaths_){
       
       ipath++;
       
