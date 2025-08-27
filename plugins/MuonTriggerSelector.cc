@@ -47,11 +47,12 @@ public:
   
 private:
   
-  reco::Track fix_track(const reco::Track *tk, double delta) const;  
+  // reco::Track fix_track(const reco::Track *tk, double delta) const;  
 
   const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bFieldToken_;  
   edm::EDGetTokenT<std::vector<pat::Muon>> muonSrc_;
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
+  const edm::EDGetTokenT<std::vector<reco::Vertex>> primaryVtxSrc_;
   edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
   edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
   
@@ -72,6 +73,7 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   muonSrc_( consumes<std::vector<pat::Muon>> ( iConfig.getParameter<edm::InputTag>( "muonCollection" ) ) ),
   //
   beamSpotSrc_(consumes<reco::BeamSpot>( iConfig.getParameter<edm::InputTag>( "beamSpot" ) ) ),
+  primaryVtxSrc_(consumes<std::vector<reco::Vertex>>( iConfig.getParameter<edm::InputTag>( "primaryVtx" ) ) ),
   triggerBits_(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("bits"))),
   triggerObjects_(consumes<std::vector<pat::TriggerObjectStandAlone>>(iConfig.getParameter<edm::InputTag>("objects"))),
   HLTPaths_(iConfig.getParameter<std::vector<std::string>>("HLTPaths")),
@@ -90,11 +92,16 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
 void MuonTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm::EventSetup& iSetup) const {
 
   const auto& bField = iSetup.getData(bFieldToken_);
-
+  
   edm::Handle<reco::BeamSpot> beamSpotHandle;
   iEvent.getByToken(beamSpotSrc_, beamSpotHandle);
   const reco::BeamSpot& beamSpot = *beamSpotHandle;
+  const reco::Vertex BSasVertex(beamSpot.position(), beamSpot.covariance3D());
 
+  edm::Handle<std::vector<reco::Vertex>> primaryVtxHandle;
+  iEvent.getByToken(primaryVtxSrc_, primaryVtxHandle);
+  const reco::Vertex &PV = primaryVtxHandle->front();
+  
   edm::Handle<edm::TriggerResults> triggerBits;
   iEvent.getByToken(triggerBits_, triggerBits);
   
@@ -278,8 +285,8 @@ void MuonTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm::
     if( muon.pt()<ptMin_ ) continue;
     if( fabs(muon.eta())>absEtaMax_ ) continue;
 
-    //const reco::TransientTrack muonTT((*(muon.bestTrack())),&(*bFieldHandle));  
-    const reco::TransientTrack muonTT( fix_track( &(*muon.bestTrack()), 1e-8 ), &bField);
+    const reco::TransientTrack muonTT((*(muon.bestTrack())), &bField);
+    // const reco::TransientTrack muonTT( fix_track( &(*muon.bestTrack()), 1e-8 ), &bField);
 
     if(!muonTT.isValid()) continue; 
     
@@ -289,16 +296,29 @@ void MuonTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm::
     int isGlobal = (int) muon.isGlobalMuon();
     int isTracker = (int) muon.isTrackerMuon();
     int isLoose = (int)muon.isLooseMuon();
+    int isMedium = (int) muon.isMediumMuon();
     muons_out->back().addUserInt("isPFcand", isPFcand);    
     muons_out->back().addUserInt("isGlobal", isGlobal);    
     muons_out->back().addUserInt("isTracker", isTracker);    
     muons_out->back().addUserInt("looseId", isLoose);
+    muons_out->back().addUserInt("isMedium", isMedium);
+
+    muons_out->back().addUserInt("isSoft", muon.isSoftMuon(PV));
+    muons_out->back().addUserInt("isSoft_BS", muon.isSoftMuon(BSasVertex)); 
+    muons_out->back().addUserInt("isTight", muon.isTightMuon(PV));
+    muons_out->back().addUserInt("isTight_BS", muon.isTightMuon(BSasVertex));  
+    
     muons_out->back().addUserInt("charge", muon.charge());
     if( muon.innerTrack().isNull() ) 
       muons_out->back().addUserInt("trackQuality", 999);
     else
       muons_out->back().addUserInt("trackQuality", (muon.innerTrack()->quality(reco::TrackBase::highPurity)));
 
+    muons_out->back().addUserFloat("z", muon.vz());
+    muons_out->back().addUserFloat("dZpv", muon.muonBestTrack()->dz(PV.position()));
+    muons_out->back().addUserFloat("err_dZpv", muon.muonBestTrack()->dzError());
+
+    
     // dr cut (same quantity as in HLTMuonDimuonL3Filter, to emulate HLT)
     float mudr = fabs( (- (muon.vx()-beamSpot.x0()) * muon.py() + (muon.vy()-beamSpot.y0()) * muon.px() ) / muon.pt() );
     muons_out->back().addUserFloat("dr", mudr);  
@@ -322,6 +342,7 @@ void MuonTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm::
  * adding the minimum eigenvalue to the diagonal of the covariance matrix plus `delta`.
  * See https://nhigham.com/2020/12/22/what-is-a-modified-cholesky-factorization/ */
 
+/*
 reco::Track MuonTriggerSelector::fix_track(const reco::Track *tk, double delta) const {
 
   unsigned int i, j;
@@ -360,6 +381,6 @@ reco::Track MuonTriggerSelector::fix_track(const reco::Track *tk, double delta) 
 
   return reco::Track(tk->chi2(), tk->ndof(), tk->referencePoint(), tk->momentum(), tk->charge(), cov, tk->algo(), (reco::TrackBase::TrackQuality) tk->qualityMask());
 }
-
+*/
 
 DEFINE_FWK_MODULE(MuonTriggerSelector);
