@@ -292,16 +292,16 @@ void MuonTriggerSelector::produce(edm::StreamID, edm::Event& iEvent, const edm::
     
     muons_out->emplace_back(muon);
 
-    int isPFcand = (int) muon.isPFMuon();
-    int isGlobal = (int) muon.isGlobalMuon();
+    int isPFcand  = (int) muon.isPFMuon();
+    int isGlobal  = (int) muon.isGlobalMuon();
     int isTracker = (int) muon.isTrackerMuon();
-    int isLoose = (int)muon.isLooseMuon();
-    int isMedium = (int) muon.isMediumMuon();
+    int isLoose   = (int) muon.isLooseMuon();
+    int isMedium  = (int) muon.isMediumMuon();
     muons_out->back().addUserInt("isPFcand", isPFcand);    
     muons_out->back().addUserInt("isGlobal", isGlobal);    
     muons_out->back().addUserInt("isTracker", isTracker);    
     muons_out->back().addUserInt("looseId", isLoose);
-    muons_out->back().addUserInt("isMedium", isMedium);
+    muons_out->back().addUserInt("mediumId", isMedium);
 
     muons_out->back().addUserInt("isSoft", muon.isSoftMuon(PV));
     muons_out->back().addUserInt("isSoft_BS", muon.isSoftMuon(BSasVertex)); 
