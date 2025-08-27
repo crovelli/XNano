@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
-Path2022=["HLT_Dimuon25_Jpsi","HLT_DoubleMu4_JpsiTrk_Bc","HLT_DoubleMu4_JpsiTrkTrk_Displaced","HLT_DoubleMu4_LowMass_Displaced","HLT_DoubleMu4_MuMuTrk_Displaced","HLT_DoubleMu4_3_LowMass"]
+Path2022=["HLT_DoubleMu4_3_LowMass"]
 
 Path=Path2022
 
@@ -39,8 +39,8 @@ muonXTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     extension = cms.bool(False),         
         variables = cms.PSet( 
         isGlobal = Var("userInt('isGlobal')",bool,doc="muon is global muon"),
-        softId = Var("passed('SoftCutBasedId')",bool,doc="soft cut-based ID"), 
-        looseId = Var("userInt('looseId')",bool,doc="loose cut-based ID"),
+        softId = Var("userInt('isSoft')",bool,doc="soft id"),
+        mediumId = Var("userInt('mediumId')",bool,doc="medium cut-based ID"),
         charge = Var("userInt('charge')",bool,doc="charge"),
         trackQuality = Var("userInt('trackQuality')",int,doc="trackQuality"),
     ),

@@ -9,11 +9,6 @@ tracksX = cms.EDProducer('TrackMerger',
                          beamSpot   = cms.InputTag("offlineBeamSpot"),
                          tracks     = cms.InputTag("packedPFCandidates"),
                          lostTracks = cms.InputTag("lostTracks"),
-                         ## trigger match  
-                         bits = cms.InputTag("TriggerResults","","HLT"), 
-                         objects = cms.InputTag("slimmedPatTrigger"), 
-                         drForTriggerMatch = cms.double(0.03), 
-                         HLTPaths=cms.vstring(Path),
                          #
                          trkPtCut = cms.double(0.5),
                          trkEtaCut = cms.double(3.0),
@@ -35,6 +30,7 @@ trackXTable = cms.EDProducer(
     variables = cms.PSet(
         isMatchedToMuon = Var("userInt('isMatchedToMuon')",bool,doc="track was used to build a muon", precision=10),
         isMatchedToLooseMuon = Var("userInt('isMatchedToLooseMuon')",bool,doc="track was used to build a muon passing LooseID", precision=10),
+        isMatchedToMediumMuon = Var("userInt('isMatchedToMediumMuon')",bool,doc="track was used to build a muon passing MediumID", precision=10),
         isMatchedToSoftMuon = Var("userInt('isMatchedToSoftMuon')",bool,doc="track was used to build a muon passing softID", precision=10),
         nValidHits = Var("userInt('nValidHits')", int,doc="Number of valid hits on track", precision=10),
     ),
