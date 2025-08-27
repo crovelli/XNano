@@ -37,10 +37,6 @@ public:
     lostTracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lostTracks"))),
     muonToken_(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons"))),
     vertexToken_(consumes<reco::VertexCollection> (cfg.getParameter<edm::InputTag>( "vertices" ))), 
-    triggerBits_(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("bits"))),  
-    triggerObjects_(consumes<std::vector<pat::TriggerObjectStandAlone>>(cfg.getParameter<edm::InputTag>("objects"))), 
-    HLTPaths_(cfg.getParameter<std::vector<std::string>>("HLTPaths")),      
-    drForTriggerMatch_(cfg.getParameter<double>("drForTriggerMatch")),
     trkPtCut_(cfg.getParameter<double>("trkPtCut")),
     trkEtaCut_(cfg.getParameter<double>("trkEtaCut")),
     trkNormChiMin_(cfg.getParameter<int>("trkNormChiMin")),
@@ -54,8 +50,6 @@ public:
   
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
   
-  reco::Track fix_track(const reco::Track *tk, double delta) const;     
-
   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions) {}
   
 private:
@@ -66,12 +60,6 @@ private:
   const edm::EDGetTokenT<pat::PackedCandidateCollection> lostTracksToken_;
   const edm::EDGetTokenT<pat::MuonCollection> muonToken_;
   const edm::EDGetTokenT<reco::VertexCollection> vertexToken_;
-  edm::EDGetTokenT<edm::TriggerResults> triggerBits_;  
-  edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;  
-
-  // for trigger match 
-  std::vector<std::string> HLTPaths_;  
-  const double drForTriggerMatch_; 
 
   // selections                                                                 
   const double trkPtCut_;
@@ -103,12 +91,6 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   evt.getByToken(vertexToken_, vertexHandle);
   const reco::Vertex & PV = vertexHandle->front();
 
-  edm::Handle<edm::TriggerResults> triggerBits;
-  evt.getByToken(triggerBits_, triggerBits);
-  
-  edm::Handle<std::vector<pat::TriggerObjectStandAlone>> triggerObjects;
-  evt.getByToken(triggerObjects_, triggerObjects);
-
   // for lost tracks / pf discrimination
   unsigned int nTracks = tracks->size();
   unsigned int totalTracks = nTracks + lostTracks->size();
@@ -120,12 +102,6 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   std::vector< std::pair<pat::CompositeCandidate,reco::TransientTrack> > vectrk_ttrk; 
 
 
-  // vectors for trigger
-  std::vector<std::vector<int>> fires;
-  std::vector<std::vector<float>> matcher; 
-  std::vector<std::vector<float>> DR;
-
-  
   // Loop over tracks and apply preselection
   std::vector<pat::PackedCandidate> preselTracks;
 
@@ -151,105 +127,17 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   }
   unsigned int numPresTracks = preselTracks.size();
 
-
-  // First do trigger match, only for selected tracks
-  for( unsigned int iTrk=0; iTrk<numPresTracks; ++iTrk ) {
-    pat::PackedCandidate trk = preselTracks[iTrk];
-    
-    // These vectors have one entry per HLT path
-    std::vector<int> frs(HLTPaths_.size(),0);              
-    std::vector<float> temp_matched_to(HLTPaths_.size(),1000.);
-    std::vector<float> temp_DR(HLTPaths_.size(),1000.);
-
-    // Loop over trigger paths
-    int ipath=-1;
-    for (const std::string &path: HLTPaths_){
-      
-      ipath++;
-      
-      // Here we loop over trigger objects
-      float minDr = 1000.;
-      float minPt = 1000.;
-      
-      const edm::TriggerNames &triggerNames = evt.triggerNames(*triggerBits);
-      for (pat::TriggerObjectStandAlone obj : *triggerObjects) { 
-	obj.unpackPathNames(triggerNames);
-
-	// Is this HLT object matching the track? 
-	bool hltMatchOffline = false;
-	TVector3 p3triggerObj;
-	p3triggerObj.SetPtEtaPhi(obj.pt(), obj.eta(), obj.phi());  
-	TVector3 p3Track;                                           
-	p3Track.SetPtEtaPhi(trk.pt(), trk.eta(), trk.phi());    
-	float dr = p3triggerObj.DeltaR(p3Track);
-	if (dr<drForTriggerMatch_) hltMatchOffline = true;
-
-	// Is this HLT object matching this path?
-	bool hltMatchThisPath = false;
-	if (hltMatchOffline==true) { 
-	  char cstr[ (path+"*").size() + 1]; 
-	  strcpy( cstr, (path+"*").c_str() ); 
-	  bool isBoth = obj.hasPathName( cstr, true, true );
-	  if (isBoth) hltMatchThisPath = true;
-	}
-
-	// Look for minDR between reco track and matched HLT object for this path
-	if (hltMatchThisPath==true && hltMatchOffline==true) {
-	  frs[ipath]=1;
-	  if (dr<minDr) {
-	    minDr = dr;
-	    minPt = obj.pt();
-	  }
-	}
-	
-      } // Loop over trigger objects
-    
-      // Here we store the minimum between reco track and all its matched HLT objects for this HLT path
-      temp_DR[ipath]=minDr;
-      temp_matched_to[ipath]=minPt;
-      
-    } // Loop over paths
-    
-    // One vector per track. Each vector : one element per path (corresponding to the closest HLT object
-    fires.push_back(frs);                 // This is used in order to see if a reco track fired a Trigger (1) or not (0).
-    matcher.push_back(temp_matched_to);   // PT of the reco track matched to HLT object
-    DR.push_back(temp_DR);
-    
-  } // Loop over reco track
-
-
-  // Now check for different reco tracks that are matched to the same HLTObject.
-  for(unsigned int path=0; path<HLTPaths_.size(); path++){
-
-    for( unsigned int iTrk=0; iTrk<numPresTracks; iTrk++ ) {
-      for(unsigned int itr=(iTrk+1); itr<numPresTracks; itr++){
-	if(matcher[iTrk][path]!=1000. && matcher[iTrk][path]==matcher[itr][path]){
-	  if(DR[iTrk][path]<DR[itr][path]){     // Keep the one that has the minimum DR with the HLT object
-	    fires[itr][path]=0;
-	    matcher[itr][path]=1000.;
-	    DR[itr][path]=1000.;                       
-	  }
-	  else{
-	    fires[iTrk][path]=0;
-	    matcher[iTrk][path]=1000.;
-	    DR[iTrk][path]=1000.;                       
-	  }
-	}              
-      }
-    }
-  }
-
   
   // Loop over tracks and save all tracks passing the selection
   for( unsigned int iTrk=0; iTrk<numPresTracks; ++iTrk ) {
 
     pat::PackedCandidate trk = preselTracks[iTrk];
-    //const reco::TransientTrack trackTT( (*trk.bestTrack()) , &(*bFieldHandle));
-    const reco::TransientTrack trackTT( fix_track( &(*trk.bestTrack()), 1e-8 ), &bField ); 
+    const reco::TransientTrack trackTT((*(trk.bestTrack())), &bField);    
 
     // clean tracks wrt to all muons
     int matchedToMuon       = 0;
     int matchedToLooseMuon  = 0;
+    int matchedToMediumMuon = 0;
     int matchedToSoftMuon   = 0;
     for (const pat::Muon &imutmp : *muons) {
       for (unsigned int i = 0; i < imutmp.numberOfSourceCandidatePtrs(); ++i) {
@@ -261,14 +149,14 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
 	if (source.id() == tracks.id() && source.key() == iTrk){
 	  matchedToMuon =1;
 	  if (imutmp.isLooseMuon())    matchedToLooseMuon  = 1;
+	  if (imutmp.isMediumMuon())   matchedToMediumMuon = 1;
 	  if (imutmp.isSoftMuon(PV))   matchedToSoftMuon   = 1;
 	  break;
 	}
       }
     }
 
-
-    // For HLT emulation
+    // Was used in Run2 trigger paths, keep in case it's useful for offline
     Basic3DVector<float> thepos( trk.bestTrack()->vertex());
     GlobalPoint thegpos( thepos);
     Basic3DVector<float> themom( trk.bestTrack()->momentum());
@@ -276,7 +164,6 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     GlobalTrajectoryParameters thepar( thegpos, thegmom, trk.bestTrack()->charge(), &bField);
     CurvilinearTrajectoryError theerr( trk.bestTrack()->covariance());
     FreeTrajectoryState InitialFTS( thepar, theerr); 
-
     TSCBLBuilderNoMaterial blsBuilder;
     TrajectoryStateClosestToBeamLine tscb( blsBuilder(InitialFTS, *beamSpotHandle));
     float d0sig=-1000.;
@@ -306,17 +193,12 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     pcand.addUserFloat("dzS", trk.dz()/trk.dzError());
     pcand.addUserInt("isMatchedToMuon", matchedToMuon);
     pcand.addUserInt("isMatchedToLooseMuon", matchedToLooseMuon);
+    pcand.addUserInt("isMatchedToMediumMuon", matchedToMediumMuon);
     pcand.addUserInt("isMatchedToSoftMuon",  matchedToSoftMuon);
     pcand.addUserInt("nValidHits", trk.bestTrack()->found());
     pcand.addUserFloat("d0sig", d0sig);    
     pcand.addUserFloat("maxd0PV", maxD0PV);
     pcand.addUserFloat("mind0PV", minD0PV);
-    // trigger match
-    for(unsigned int i=0; i<HLTPaths_.size(); i++){
-      pcand.addUserInt(HLTPaths_[i],fires[iTrk][i]);
-      std::string namedr = HLTPaths_[i]+"_dr";
-      pcand.addUserFloat(namedr,DR[iTrk][i]);  
-    }
 
     // in order to avoid revoking the sxpensive ttrack builder many times and still have everything sorted, we add them to vector of pairs
     vectrk_ttrk.emplace_back( std::make_pair(pcand,trackTT ) );   
@@ -337,52 +219,6 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   evt.put(std::move(tracks_out),       "SelectedTracks");
   evt.put(std::move(trans_tracks_out), "SelectedTransientTracks");
 }
-
-// O. Cerri's code to deal with not positive definite covariance matrices
-// https://github.com/ocerri/BPH_RDntuplizer/blob/master/plugins/VtxUtils.cc
-/* Check for a not positive definite covariance matrix. If the covariance matrix is not positive definite, we force it to be positive definite by
- * adding the minimum eigenvalue to the diagonal of the covariance matrix plus `delta`.
- * See https://nhigham.com/2020/12/22/what-is-a-modified-cholesky-factorization/ */
-
-reco::Track TrackMerger::fix_track(const reco::Track *tk, double delta) const {
-
-  unsigned int i, j;
-  double min_eig = 1;
-
-  // Get the original covariance matrix. 
-  reco::TrackBase::CovarianceMatrix cov = tk->covariance();
-
-  // Convert it from an SMatrix to a TMatrixD so we can get the eigenvalues. 
-  TMatrixDSym new_cov(cov.kRows);
-  for (i = 0; i < cov.kRows; i++) {
-    for (j = 0; j < cov.kRows; j++) {
-    // Need to check for nan or inf, because for some reason these
-    // cause a segfault when calling Eigenvectors().
-    //
-    // No idea what to do here or why this happens. 
-    if (std::isnan(cov(i,j)) || std::isinf(cov(i,j)))
-	cov(i,j) = 1e-6;
-      new_cov(i,j) = cov(i,j);
-    }
-  }
-
-  // Get the eigenvalues. 
-  TVectorD eig(cov.kRows);
-  new_cov.EigenVectors(eig);
-  for (i = 0; i < cov.kRows; i++)
-    if (eig(i) < min_eig)
-      min_eig = eig(i);
-
-  // If the minimum eigenvalue is less than zero, then subtract it from the
-  // diagonal and add `delta`. 
-  if (min_eig < 0) {
-    for (i = 0; i < cov.kRows; i++)
-      cov(i,i) -= min_eig - delta;
-  }
-
-  return reco::Track(tk->chi2(), tk->ndof(), tk->referencePoint(), tk->momentum(), tk->charge(), cov, tk->algo(), (reco::TrackBase::TrackQuality) tk->qualityMask());
-}
-
 
 
 //define this as a plug-in
