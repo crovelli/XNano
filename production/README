@@ -1,4 +1,4 @@
-pythonTO SUBMIT:
+TO SUBMIT:
 - source /cvmfs/cms.cern.ch/crab3/crab.csh
 - voms-proxy-init --voms cms --valid 168:00
-- python3 submit_on_crab.py
+- python3 submit_on_crab.py -y data_samples_2023BC.yml
