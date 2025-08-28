@@ -1,0 +1,148 @@
+common:
+  data:
+    lumimask : https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions23/Cert_Collisions2023_366442_370790_Golden.json
+    splitting: 20
+    globaltag: 130X_dataRun3_PromptAnalysis_v1
+  mc:
+    splitting: 1
+    globaltag: 130X_mcRun3_2023_realistic_v14
+
+samples:
+  #
+  #  DATA
+  #  
+  #
+  # --- 2023 B
+  data_Run2023Bv1_0:    
+    dataset: /ParkingDoubleMuonLowMass0/Run2023B-22Sep2023-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023Bv1_1:    
+    dataset: /ParkingDoubleMuonLowMass1/Run2023B-22Sep2023-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023Bv1_2:    
+    dataset: /ParkingDoubleMuonLowMass2/Run2023B-22Sep2023-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023Bv1_3:    
+    dataset: /ParkingDoubleMuonLowMass3/Run2023B-22Sep2023-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023Bv1_4:    
+    dataset: /ParkingDoubleMuonLowMass4/Run2023B-22Sep2023-v2/MINIAOD
+    isMC: False
+  #
+  data_Run2023Bv1_5:    
+    dataset: /ParkingDoubleMuonLowMass5/Run2023B-22Sep2023-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023Bv1_6:    
+    dataset: /ParkingDoubleMuonLowMass6/Run2023B-22Sep2023-v1/MINIAOD
+    isMC: False
+  #
+  data_Run2023Bv1_7:    
+    dataset: /ParkingDoubleMuonLowMass7/Run2023B-22Sep2023-v1/MINIAOD
+    isMC: False
+  
+  # --- 2023 C
+  # (v1)
+  data_Run2023Cv1_0:    
+    dataset: /ParkingDoubleMuonLowMass0/Run2023C-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  data_Run2023Cv1_1:    
+    dataset: /ParkingDoubleMuonLowMass1/Run2023C-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  data_Run2023Cv1_2:    
+    dataset: /ParkingDoubleMuonLowMass2/Run2023C-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  data_Run2023Cv1_3:    
+    dataset: /ParkingDoubleMuonLowMass3/Run2023C-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  data_Run2023Cv1_4:    
+    dataset: /ParkingDoubleMuonLowMass4/Run2023C-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  data_Run2023Cv1_5:    
+    dataset: /ParkingDoubleMuonLowMass5/Run2023C-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  data_Run2023Cv1_6:    
+    dataset: /ParkingDoubleMuonLowMass6/Run2023C-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  data_Run2023Cv1_7:    
+    dataset: /ParkingDoubleMuonLowMass7/Run2023C-22Sep2023_v1-v1/MINIAOD
+    isMC: False  
+  ## (v2)
+  #data_Run2023Cv2_0:    
+  #  dataset: /ParkingDoubleMuonLowMass0/Run2023C-22Sep2023_v2-v1/MINIAOD
+  #  isMC: False
+  #data_Run2023Cv2_1:    
+  #  dataset: /ParkingDoubleMuonLowMass1/Run2023C-22Sep2023_v2-v1/MINIAOD
+  #  isMC: False
+  #data_Run2023Cv2_2:    
+  #  dataset: /ParkingDoubleMuonLowMass2/Run2023C-22Sep2023_v2-v1/MINIAOD
+  #  isMC: False
+  #data_Run2023Cv2_3:    
+  #  dataset: /ParkingDoubleMuonLowMass3/Run2023C-22Sep2023_v2-v1/MINIAOD
+  #  isMC: False
+  #data_Run2023Cv2_4:    
+  #  dataset: /ParkingDoubleMuonLowMass4/Run2023C-22Sep2023_v2-v1/MINIAOD
+  #  isMC: False
+  #data_Run2023Cv2_5:    
+  #  dataset: /ParkingDoubleMuonLowMass5/Run2023C-22Sep2023_v2-v1/MINIAOD
+  #  isMC: False
+  #data_Run2023Cv2_6:    
+  #  dataset: /ParkingDoubleMuonLowMass6/Run2023C-22Sep2023_v2-v1/MINIAOD
+  #  isMC: False
+  #data_Run2023Cv2_7:    
+  #  dataset: /ParkingDoubleMuonLowMass7/Run2023C-22Sep2023_v2-v1/MINIAOD
+  #  isMC: False  
+  ## (v3)
+  #data_Run2023Cv3_0:    
+  #  dataset: /ParkingDoubleMuonLowMass0/Run2023C-22Sep2023_v3-v1/MINIAOD
+  #  isMC: False
+  #data_Run2023Cv3_1:    
+  #  dataset: /ParkingDoubleMuonLowMass1/Run2023C-22Sep2023_v3-v1/MINIAOD
+  #  isMC: False
+  #data_Run2023Cv3_2:    
+  #  dataset: /ParkingDoubleMuonLowMass2/Run2023C-22Sep2023_v3-v1/MINIAOD
+  #  isMC: False
+  #data_Run2023Cv3_3:    
+  #  dataset: /ParkingDoubleMuonLowMass3/Run2023C-22Sep2023_v3-v1/MINIAOD
+  #  isMC: False
+  #data_Run2023Cv3_4:    
+  #  dataset: /ParkingDoubleMuonLowMass4/Run2023C-22Sep2023_v3-v1/MINIAOD
+  #  isMC: False
+  #data_Run2023Cv3_5:    
+  #  dataset: /ParkingDoubleMuonLowMass5/Run2023C-22Sep2023_v3-v1/MINIAOD
+  #  isMC: False
+  #data_Run2023Cv3_6:    
+  #  dataset: /ParkingDoubleMuonLowMass6/Run2023C-22Sep2023_v3-v1/MINIAOD
+  #  isMC: False
+  #data_Run2023Cv3_7:    
+  #  dataset: /ParkingDoubleMuonLowMass7/Run2023C-22Sep2023_v3-v1/MINIAOD
+  #  isMC: False  
+  # (v4)
+  data_Run2023Cv4_0:    
+    dataset: /ParkingDoubleMuonLowMass0/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False
+  data_Run2023Cv4_1:    
+    dataset: /ParkingDoubleMuonLowMass1/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False
+  data_Run2023Cv4_2:    
+    dataset: /ParkingDoubleMuonLowMass2/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False
+  data_Run2023Cv4_3:    
+    dataset: /ParkingDoubleMuonLowMass3/Run2023C-22Sep2023_v4-v2/MINIAOD
+    isMC: False
+  data_Run2023Cv4_4:    
+    dataset: /ParkingDoubleMuonLowMass4/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False
+  data_Run2023Cv4_5:    
+    dataset: /ParkingDoubleMuonLowMass5/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False
+  data_Run2023Cv4_6:    
+    dataset: /ParkingDoubleMuonLowMass6/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False
+  data_Run2023Cv4_7:    
+    dataset: /ParkingDoubleMuonLowMass7/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False  

@@ -1,0 +1,16 @@
+common:
+  mc:
+    splitting: 1
+    globaltag: 130X_mcRun3_2023_realistic_postBPix_v2 
+
+samples:
+  #
+  #  MC
+  #  
+  BuToPsi2SKs_2022EE:
+    dataset: /BuToPsi2SKs_Psi2SToJPsiPiPi_JPsiToMuMu_RhoToPiPi_TuneCP5_13p6TeV_pythia8-evtgen/Run3Summer23BPixMiniAODv4-130X_mcRun3_2023_realistic_postBPix_v2-v3/MINIAODSIM
+    isMC: True  
+
+  BuToX3872SKs_2022EE:
+    dataset: /BuToX3872Ks_X3872ToJPsiRho_JPsiToMuMu_RhoToPiPi_TuneCP5_13p6TeV_pythia8-evtgen/Run3Summer23BPixMiniAODv4-130X_mcRun3_2023_realistic_postBPix_v2-v3/MINIAODSIM
+    isMC: True
