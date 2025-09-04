@@ -139,6 +139,9 @@ BToK0sMuMuPiPiTable = cms.EDProducer(
         finalFit_pt = ufloat('fitted_pt'),
         finalFit_eta = ufloat('fitted_eta'),
         finalFit_phi = ufloat('fitted_phi'),
+        # for decorrelation B / X
+        finalFit_mass_decX = ufloat('fitted_mass_decX'),  
+        finalFit_mass_decPsi2s = ufloat('fitted_mass_decPsi2s'),  
         # fitted daughters
         finalFit_X_mass = ufloat('finalFit_X_mass'),        
         finalFit_Rho_mass  = ufloat('finalFit_Rho_mass'),

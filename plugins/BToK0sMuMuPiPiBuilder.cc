@@ -217,7 +217,7 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     cand.addUserFloat("fitted_pt"  , fit_p4.Perp()); 
     cand.addUserFloat("fitted_eta" , fit_p4.Eta());
     cand.addUserFloat("fitted_phi" , fit_p4.Phi());
-    cand.addUserFloat("fitted_mass", fitted_particle->currentState().mass());    
+    cand.addUserFloat("fitted_mass", fitted_particle->currentState().mass());
 
     RefCountedKinematicVertex fitted_vtx = vertexFitTree->currentDecayVertex();     
     cand.setVertex( reco::Candidate::Point(fitted_vtx->position().x(), fitted_vtx->position().y(), fitted_vtx->position().z()) );
@@ -254,6 +254,11 @@ void BToK0sMuMuPiPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     cand.addUserFloat("finalFit_X_mass",    ((p4fit_mu1 + p4fit_mu2 + p4fit_pi1 + p4fit_pi2).M()) );
     cand.addUserFloat("finalFit_Rho_mass",  ((p4fit_pi1 + p4fit_pi2).M()) );
     cand.addUserFloat("finalFit_JPsi_mass", ((p4fit_mu1 + p4fit_mu2).M()) );
+
+    // To decorrelate X vs B
+    float thexmass = ((p4fit_mu1 + p4fit_mu2 + p4fit_pi1 + p4fit_pi2).M());
+    cand.addUserFloat("fitted_mass_decX",     (fitted_particle->currentState().mass()-thexmass+3.87165));
+    cand.addUserFloat("fitted_mass_decPsi2s", (fitted_particle->currentState().mass()-thexmass+3.68609));
 
     // post fit selection 
     if( !post_vtx_selection_(cand) ) continue;        
