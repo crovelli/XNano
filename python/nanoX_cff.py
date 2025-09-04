@@ -22,9 +22,12 @@ from PhysicsTools.XNano.B0ToK0X_cff import *
 
 nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectXTables + l1bits)
 
+vertexTable.svSrc = cms.InputTag("slimmedSecondaryVertices")
+
 nanoSequence = cms.Sequence(nanoMetadata + 
-                            cms.Sequence(vertexTask) +           
-                            cms.Sequence(globalTablesTask) + cms.Sequence(vertexTablesTask) +
+                            cms.Sequence(vertexTask) +
+                            cms.Sequence(vertexTablesTask) +  
+                            cms.Sequence(globalTablesTask) + 
                             triggerObjectXTables + l1bits)
 
 nanoSequenceMC = cms.Sequence(particleLevelXSequence + genParticleXSequence + 
